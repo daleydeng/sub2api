@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const PAGE_SIZE = 20
 
@@ -179,11 +180,16 @@ export default function PromoCodesView() {
             <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input value={search} onChange={(e) => handleSearchChange(e.target.value)} placeholder={t('Search promo codes...')} className="pl-9" />
           </div>
-          <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }} className="input-field w-auto">
-            <option value="all">{t('All Status')}</option>
-            <option value="active">{t('Active')}</option>
-            <option value="disabled">{t('Disabled')}</option>
-          </select>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1) }}>
+            <SelectTrigger className="w-auto">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('All Status')}</SelectItem>
+              <SelectItem value="active">{t('Active')}</SelectItem>
+              <SelectItem value="disabled">{t('Disabled')}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -225,7 +231,7 @@ export default function PromoCodesView() {
             </div>
             <form.Field name="expires_at">{(field) => <div className="space-y-2"><Label>{t('Expires At')}</Label><input type="datetime-local" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="input-field w-full" /></div>}</form.Field>
             <form.Field name="notes">{(field) => <div className="space-y-2"><Label>{t('Notes')}</Label><Textarea value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} rows={2} /></div>}</form.Field>
-            {isEdit && <form.Field name="status">{(field) => <div className="space-y-2"><Label>{t('Status')}</Label><select value={field.state.value} onChange={(e) => field.handleChange(e.target.value as 'active' | 'disabled')} className="input-field"><option value="active">{t('Active')}</option><option value="disabled">{t('Disabled')}</option></select></div>}</form.Field>}
+            {isEdit && <form.Field name="status">{(field) => <div className="space-y-2"><Label>{t('Status')}</Label><Select value={field.state.value} onValueChange={(v) => field.handleChange(v as 'active' | 'disabled')}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="active">{t('Active')}</SelectItem><SelectItem value="disabled">{t('Disabled')}</SelectItem></SelectContent></Select></div>}</form.Field>}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowFormDialog(false)} disabled={form.state.isSubmitting}>{t('Cancel')}</Button>

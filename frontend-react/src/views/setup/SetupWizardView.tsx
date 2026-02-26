@@ -6,6 +6,7 @@ import type { DatabaseConfig } from '@/api/setup'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
   const { t } = useTranslation()
@@ -211,12 +212,17 @@ export default function SetupWizardView() {
                   {(field) => (
                     <div>
                       <Label>{t('setup.sslMode', 'SSL Mode')}</Label>
-                      <select value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="input-field w-full">
-                        <option value="disable">disable</option>
-                        <option value="require">require</option>
-                        <option value="verify-ca">verify-ca</option>
-                        <option value="verify-full">verify-full</option>
-                      </select>
+                      <Select value={field.state.value} onValueChange={field.handleChange}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="disable">disable</SelectItem>
+                          <SelectItem value="require">require</SelectItem>
+                          <SelectItem value="verify-ca">verify-ca</SelectItem>
+                          <SelectItem value="verify-full">verify-full</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   )}
                 </DbForm_Field>

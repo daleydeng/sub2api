@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const PAGE_SIZE = 20
 
@@ -115,12 +116,17 @@ export default function AnnouncementsView() {
             <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
             <Input value={search} onChange={(e) => handleSearchChange(e.target.value)} placeholder={t('Search announcements...')} className="pl-9" />
           </div>
-          <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value as any); setPage(1) }} className="input-field w-auto">
-            <option value="all">{t('All Status')}</option>
-            <option value="draft">{t('Draft')}</option>
-            <option value="active">{t('Active')}</option>
-            <option value="archived">{t('Archived')}</option>
-          </select>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as any); setPage(1) }}>
+            <SelectTrigger className="w-auto">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('All Status')}</SelectItem>
+              <SelectItem value="draft">{t('Draft')}</SelectItem>
+              <SelectItem value="active">{t('Active')}</SelectItem>
+              <SelectItem value="archived">{t('Archived')}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -153,7 +159,7 @@ export default function AnnouncementsView() {
           <div className="space-y-5 py-2">
             <form.Field name="title">{(field) => <div className="space-y-2"><Label>{t('Title')} *</Label><Input value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} placeholder={t('Announcement title')} /></div>}</form.Field>
             <form.Field name="content">{(field) => <div className="space-y-2"><Label>{t('Content')}</Label><Textarea value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} rows={5} placeholder={t('Announcement content (supports Markdown)')} /></div>}</form.Field>
-            <form.Field name="status">{(field) => <div className="space-y-2"><Label>{t('Status')}</Label><select value={field.state.value} onChange={(e) => field.handleChange(e.target.value as AnnouncementStatus)} className="input-field"><option value="draft">{t('Draft')}</option><option value="active">{t('Active')}</option><option value="archived">{t('Archived')}</option></select></div>}</form.Field>
+            <form.Field name="status">{(field) => <div className="space-y-2"><Label>{t('Status')}</Label><Select value={field.state.value} onValueChange={(v) => field.handleChange(v as AnnouncementStatus)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="draft">{t('Draft')}</SelectItem><SelectItem value="active">{t('Active')}</SelectItem><SelectItem value="archived">{t('Archived')}</SelectItem></SelectContent></Select></div>}</form.Field>
             <div className="grid grid-cols-2 gap-5">
               <form.Field name="starts_at">{(field) => <div className="space-y-2"><Label>{t('Starts At')}</Label><input type="datetime-local" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="input-field w-full" /></div>}</form.Field>
               <form.Field name="ends_at">{(field) => <div className="space-y-2"><Label>{t('Ends At')}</Label><input type="datetime-local" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="input-field w-full" /></div>}</form.Field>

@@ -34,6 +34,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 function maskKey(key: string): string {
   if (key.length <= 12) return key
@@ -382,10 +383,15 @@ export default function KeysView() {
               {(field) => (
                 <div className="space-y-2">
                   <Label>{t('keys.group', 'Group')}</Label>
-                  <select value={field.state.value ?? ''} onChange={(e) => field.handleChange(e.target.value ? Number(e.target.value) : null)} className="input-field w-full">
-                    <option value="">{t('keys.default', 'Default')}</option>
-                    {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
-                  </select>
+                  <Select value={String(field.state.value ?? '__none__')} onValueChange={(v) => field.handleChange(v === '__none__' ? null : Number(v))}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t('keys.default', 'Default')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">{t('keys.default', 'Default')}</SelectItem>
+                      {groups.map((g) => <SelectItem key={g.id} value={String(g.id)}>{g.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </CreateForm_Field>
@@ -442,10 +448,15 @@ export default function KeysView() {
                 {(field) => (
                   <div className="space-y-2">
                     <Label>{t('keys.group', 'Group')}</Label>
-                    <select value={field.state.value ?? ''} onChange={(e) => field.handleChange(e.target.value ? Number(e.target.value) : null)} className="input-field w-full">
-                      <option value="">{t('keys.default', 'Default')}</option>
-                      {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
-                    </select>
+                    <Select value={String(field.state.value ?? '__none__')} onValueChange={(v) => field.handleChange(v === '__none__' ? null : Number(v))}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={t('keys.default', 'Default')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">{t('keys.default', 'Default')}</SelectItem>
+                        {groups.map((g) => <SelectItem key={g.id} value={String(g.id)}>{g.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
               </EditForm_Field>
@@ -453,10 +464,15 @@ export default function KeysView() {
                 {(field) => (
                   <div className="space-y-2">
                     <Label>{t('keys.status', 'Status')}</Label>
-                    <select value={field.state.value} onChange={(e) => field.handleChange(e.target.value as 'active' | 'inactive')} className="input-field w-full">
-                      <option value="active">{t('keys.status_active', 'Active')}</option>
-                      <option value="inactive">{t('keys.status_inactive', 'Inactive')}</option>
-                    </select>
+                    <Select value={field.state.value} onValueChange={(v) => field.handleChange(v as 'active' | 'inactive')}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">{t('keys.status_active', 'Active')}</SelectItem>
+                        <SelectItem value="inactive">{t('keys.status_inactive', 'Inactive')}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
               </EditForm_Field>

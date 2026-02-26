@@ -12,6 +12,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useAdminSettingsStore } from '@/stores/adminSettings'
 import { useOnboardingStore } from '@/stores/onboarding'
 import { useTheme } from '@/hooks/useTheme'
+import { Separator } from '@/components/ui/separator'
 import VersionBadge from '@/components/common/VersionBadge'
 import {
   DashboardIcon,
@@ -210,7 +211,7 @@ export default function AppSidebar() {
                   {!sidebarCollapsed ? (
                     <div className="sidebar-section-title">{t('nav.myAccount')}</div>
                   ) : (
-                    <div className="mx-3 my-3 h-px bg-gray-200 dark:bg-dark-700" />
+                    <Separator className="mx-3 my-3" />
                   )}
                   {personalNavItems.map(renderNavItem)}
                 </div>

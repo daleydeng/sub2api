@@ -32,6 +32,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const PAGE_SIZE = 20
 
@@ -321,33 +322,29 @@ export default function RedeemView() {
               className="pl-9"
             />
           </div>
-          <select
-            value={typeFilter}
-            onChange={(e) => {
-              setTypeFilter(e.target.value as any)
-              setPage(1)
-            }}
-            className="input-field w-auto"
-          >
-            <option value="all">{t('All Types')}</option>
-            <option value="balance">{t('Balance')}</option>
-            <option value="concurrency">{t('Concurrency')}</option>
-            <option value="subscription">{t('Subscription')}</option>
-          </select>
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value as any)
-              setPage(1)
-            }}
-            className="input-field w-auto"
-          >
-            <option value="all">{t('All Status')}</option>
-            <option value="active">{t('Active')}</option>
-            <option value="unused">{t('Unused')}</option>
-            <option value="used">{t('Used')}</option>
-            <option value="expired">{t('Expired')}</option>
-          </select>
+          <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v as any); setPage(1) }}>
+            <SelectTrigger className="w-auto">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('All Types')}</SelectItem>
+              <SelectItem value="balance">{t('Balance')}</SelectItem>
+              <SelectItem value="concurrency">{t('Concurrency')}</SelectItem>
+              <SelectItem value="subscription">{t('Subscription')}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v as any); setPage(1) }}>
+            <SelectTrigger className="w-auto">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('All Status')}</SelectItem>
+              <SelectItem value="active">{t('Active')}</SelectItem>
+              <SelectItem value="unused">{t('Unused')}</SelectItem>
+              <SelectItem value="used">{t('Used')}</SelectItem>
+              <SelectItem value="expired">{t('Expired')}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -475,17 +472,16 @@ export default function RedeemView() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>{t('Type')}</Label>
-              <select
-                value={genForm.type}
-                onChange={(e) =>
-                  setGenForm((f) => ({ ...f, type: e.target.value as RedeemCodeType }))
-                }
-                className="input-field w-full"
-              >
-                <option value="balance">{t('Balance')}</option>
-                <option value="concurrency">{t('Concurrency')}</option>
-                <option value="subscription">{t('Subscription')}</option>
-              </select>
+              <Select value={genForm.type} onValueChange={(v) => setGenForm((f) => ({ ...f, type: v as RedeemCodeType }))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="balance">{t('Balance')}</SelectItem>
+                  <SelectItem value="concurrency">{t('Concurrency')}</SelectItem>
+                  <SelectItem value="subscription">{t('Subscription')}</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -524,20 +520,19 @@ export default function RedeemView() {
               <>
                 <div className="space-y-2">
                   <Label>{t('Group')} *</Label>
-                  <select
-                    value={genForm.group_id}
-                    onChange={(e) =>
-                      setGenForm((f) => ({ ...f, group_id: Number(e.target.value) }))
-                    }
-                    className="input-field w-full"
-                  >
-                    <option value={0}>{t('Select a group...')}</option>
-                    {allGroups.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.name} ({g.platform})
-                      </option>
-                    ))}
-                  </select>
+                  <Select value={String(genForm.group_id)} onValueChange={(v) => setGenForm((f) => ({ ...f, group_id: Number(v) }))}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="0">{t('Select a group...')}</SelectItem>
+                      {allGroups.map((g) => (
+                        <SelectItem key={g.id} value={String(g.id)}>
+                          {g.name} ({g.platform})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>{t('Validity Days')}</Label>
