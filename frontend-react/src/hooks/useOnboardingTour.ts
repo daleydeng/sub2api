@@ -3,6 +3,7 @@ import { driver, type Driver, type DriveStep } from 'driver.js'
 import 'driver.js/dist/driver.css'
 import '@/onboarding.css'
 import { useAuthStore } from '@/stores/auth'
+import { useAppStore } from '@/stores/app'
 import { useOnboardingStore } from '@/stores/onboarding'
 import { useTranslation } from 'react-i18next'
 import { getAdminSteps, getUserSteps } from '@/components/Guide/steps'
@@ -360,6 +361,8 @@ export function useOnboardingTour(options: OnboardingOptions) {
     if (isSimpleMode) return
     if (user?.role !== 'admin') return
     if (!options.autoStart || hasSeen()) return
+    const onboardingEnabled = useAppStore.getState().cachedPublicSettings?.onboarding_enabled ?? false
+    if (!onboardingEnabled) return
 
     autoStartTimerRef.current = setTimeout(() => { void startTour() }, TIMING.AUTO_START_DELAY_MS)
 

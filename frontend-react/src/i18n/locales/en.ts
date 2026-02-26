@@ -3634,7 +3634,7 @@ export default {
 
   // Onboarding Tour
   onboarding: {
-    restartTour: 'Restart Onboarding Tour',
+    restartTour: 'Guided Tour',
     dontShowAgain: "Don't show again",
     dontShowAgainTitle: 'Permanently close onboarding guide',
     confirmDontShow: "Are you sure you don't want to see the onboarding guide again?\n\nYou can restart it anytime from the user menu in the top right corner.",

@@ -3805,7 +3805,7 @@ export default {
 
   // Onboarding Tour
   onboarding: {
-    restartTour: '重新查看新手引导',
+    restartTour: '新手引导',
     dontShowAgain: '不再提示',
     dontShowAgainTitle: '永久关闭新手引导',
     confirmDontShow: '确定不再显示新手引导吗？\n\n您可以随时在右上角头像菜单中重新开启。',
