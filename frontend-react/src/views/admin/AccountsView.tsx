@@ -106,9 +106,9 @@ export default function AccountsView() {
   const [loading, setLoading] = useState(false)
 
   // Filters
-  const [filterPlatform, setFilterPlatform] = useState('')
-  const [filterType, setFilterType] = useState('')
-  const [filterStatus, setFilterStatus] = useState('')
+  const [filterPlatform, setFilterPlatform] = useState('all')
+  const [filterType, setFilterType] = useState('all')
+  const [filterStatus, setFilterStatus] = useState('all')
   const [search, setSearch] = useState('')
 
   // Dialogs
@@ -186,9 +186,9 @@ export default function AccountsView() {
     setLoading(true)
     try {
       const filters: Record<string, string> = {}
-      if (filterPlatform) filters.platform = filterPlatform
-      if (filterType) filters.type = filterType
-      if (filterStatus) filters.status = filterStatus
+      if (filterPlatform !== 'all') filters.platform = filterPlatform
+      if (filterType !== 'all') filters.type = filterType
+      if (filterStatus !== 'all') filters.status = filterStatus
       if (search) filters.search = search
       const data: PaginatedResponse<Account> = await adminAPI.accounts.list(p, PAGE_SIZE, filters, { signal: ctrl.signal })
       setAccounts(data.items || [])
@@ -402,21 +402,21 @@ export default function AccountsView() {
           <Select value={filterPlatform} onValueChange={setFilterPlatform}>
             <SelectTrigger className="w-auto text-sm"><SelectValue placeholder={t('admin.accounts.allPlatforms', 'All Platforms')} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{t('admin.accounts.allPlatforms', 'All Platforms')}</SelectItem>
+              <SelectItem value="all">{t('admin.accounts.allPlatforms', 'All Platforms')}</SelectItem>
               {PLATFORMS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={filterType} onValueChange={setFilterType}>
             <SelectTrigger className="w-auto text-sm"><SelectValue placeholder={t('admin.accounts.allTypes', 'All Types')} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{t('admin.accounts.allTypes', 'All Types')}</SelectItem>
+              <SelectItem value="all">{t('admin.accounts.allTypes', 'All Types')}</SelectItem>
               {ACCOUNT_TYPES.map((at) => <SelectItem key={at.value} value={at.value}>{at.label}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-auto text-sm"><SelectValue placeholder={t('admin.accounts.allStatuses', 'All Statuses')} /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{t('admin.accounts.allStatuses', 'All Statuses')}</SelectItem>
+              <SelectItem value="all">{t('admin.accounts.allStatuses', 'All Statuses')}</SelectItem>
               {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
             </SelectContent>
           </Select>

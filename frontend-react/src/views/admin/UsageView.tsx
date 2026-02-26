@@ -276,12 +276,12 @@ export default function UsageView() {
             placeholder={t('admin.usage.model', 'Model...')}
             className="text-sm"
           />
-          <Select value={streamFilter} onValueChange={(v) => setStreamFilter(v as '' | 'true' | 'false')}>
+          <Select value={streamFilter || 'all'} onValueChange={(v) => setStreamFilter(v === 'all' ? '' : v as 'true' | 'false')}>
             <SelectTrigger className="text-sm">
               <SelectValue placeholder={t('admin.usage.allStream', 'All (Stream)')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{t('admin.usage.allStream', 'All (Stream)')}</SelectItem>
+              <SelectItem value="all">{t('admin.usage.allStream', 'All (Stream)')}</SelectItem>
               <SelectItem value="true">{t('admin.usage.streamYes', 'Stream: Yes')}</SelectItem>
               <SelectItem value="false">{t('admin.usage.streamNo', 'Stream: No')}</SelectItem>
             </SelectContent>

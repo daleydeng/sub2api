@@ -189,14 +189,14 @@ export default function UsageView() {
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('usage.apiKey', 'API Key')}:</label>
             <Select
-              value={selectedKeyId != null ? String(selectedKeyId) : ''}
-              onValueChange={(v) => { setSelectedKeyId(v ? Number(v) : undefined); setPage(1) }}
+              value={selectedKeyId != null ? String(selectedKeyId) : 'all'}
+              onValueChange={(v) => { setSelectedKeyId(v === 'all' ? undefined : Number(v)); setPage(1) }}
             >
               <SelectTrigger className="w-48 text-sm">
                 <SelectValue placeholder={t('usage.allKeys', 'All Keys')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">{t('usage.allKeys', 'All Keys')}</SelectItem>
+                <SelectItem value="all">{t('usage.allKeys', 'All Keys')}</SelectItem>
                 {apiKeys.map((k) => <SelectItem key={k.id} value={String(k.id)}>{k.name}</SelectItem>)}
               </SelectContent>
             </Select>

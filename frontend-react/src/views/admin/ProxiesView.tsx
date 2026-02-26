@@ -80,8 +80,8 @@ export default function ProxiesView() {
   const [loading, setLoading] = useState(false)
 
   // Filters
-  const [filterProtocol, setFilterProtocol] = useState('')
-  const [filterStatus, setFilterStatus] = useState('')
+  const [filterProtocol, setFilterProtocol] = useState('all')
+  const [filterStatus, setFilterStatus] = useState('all')
   const [search, setSearch] = useState('')
 
   // Dialogs
@@ -127,8 +127,8 @@ export default function ProxiesView() {
     setLoading(true)
     try {
       const filters: Record<string, string> = {}
-      if (filterProtocol) filters.protocol = filterProtocol
-      if (filterStatus) filters.status = filterStatus
+      if (filterProtocol !== 'all') filters.protocol = filterProtocol
+      if (filterStatus !== 'all') filters.status = filterStatus
       if (search) filters.search = search
       const data: PaginatedResponse<Proxy> = await adminAPI.proxies.list(
         p, PAGE_SIZE,
@@ -341,7 +341,7 @@ export default function ProxiesView() {
               <SelectValue placeholder={t('admin.proxies.allProtocols', 'All Protocols')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{t('admin.proxies.allProtocols', 'All Protocols')}</SelectItem>
+              <SelectItem value="all">{t('admin.proxies.allProtocols', 'All Protocols')}</SelectItem>
               {PROTOCOLS.map((p) => (
                 <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
               ))}
@@ -352,7 +352,7 @@ export default function ProxiesView() {
               <SelectValue placeholder={t('admin.proxies.allStatuses', 'All Statuses')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{t('admin.proxies.allStatuses', 'All Statuses')}</SelectItem>
+              <SelectItem value="all">{t('admin.proxies.allStatuses', 'All Statuses')}</SelectItem>
               <SelectItem value="active">{t('common.active', 'Active')}</SelectItem>
               <SelectItem value="inactive">{t('common.inactive', 'Inactive')}</SelectItem>
             </SelectContent>
