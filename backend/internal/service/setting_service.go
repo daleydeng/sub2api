@@ -77,6 +77,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SettingKeyPurchaseSubscriptionEnabled,
 		SettingKeyPurchaseSubscriptionURL,
 		SettingKeyLinuxDoConnectEnabled,
+		SettingKeyOnboardingEnabled,
 	}
 
 	settings, err := s.settingRepo.GetMultiple(ctx, keys)
@@ -115,6 +116,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		PurchaseSubscriptionEnabled: settings[SettingKeyPurchaseSubscriptionEnabled] == "true",
 		PurchaseSubscriptionURL:     strings.TrimSpace(settings[SettingKeyPurchaseSubscriptionURL]),
 		LinuxDoOAuthEnabled:         linuxDoEnabled,
+		OnboardingEnabled:           settings[SettingKeyOnboardingEnabled] == "true",
 	}, nil
 }
 
@@ -159,6 +161,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		PurchaseSubscriptionURL     string `json:"purchase_subscription_url,omitempty"`
 		LinuxDoOAuthEnabled         bool   `json:"linuxdo_oauth_enabled"`
 		Version                     string `json:"version,omitempty"`
+		OnboardingEnabled           bool   `json:"onboarding_enabled"`
 	}{
 		RegistrationEnabled:         settings.RegistrationEnabled,
 		EmailVerifyEnabled:          settings.EmailVerifyEnabled,
@@ -180,6 +183,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		PurchaseSubscriptionURL:     settings.PurchaseSubscriptionURL,
 		LinuxDoOAuthEnabled:         settings.LinuxDoOAuthEnabled,
 		Version:                     s.version,
+		OnboardingEnabled:           settings.OnboardingEnabled,
 	}, nil
 }
 
@@ -255,6 +259,9 @@ func (s *SettingService) UpdateSettings(ctx context.Context, settings *SystemSet
 	if settings.OpsMetricsIntervalSeconds > 0 {
 		updates[SettingKeyOpsMetricsIntervalSeconds] = strconv.Itoa(settings.OpsMetricsIntervalSeconds)
 	}
+
+	// Onboarding tour
+	updates[SettingKeyOnboardingEnabled] = strconv.FormatBool(settings.OnboardingEnabled)
 
 	err := s.settingRepo.SetMultiple(ctx, updates)
 	if err == nil && s.onUpdate != nil {
@@ -402,6 +409,8 @@ func (s *SettingService) InitializeDefaultSettings(ctx context.Context) error {
 		SettingKeyOpsRealtimeMonitoringEnabled: "true",
 		SettingKeyOpsQueryModeDefault:          "auto",
 		SettingKeyOpsMetricsIntervalSeconds:    "60",
+		// Onboarding tour
+		SettingKeyOnboardingEnabled: "false",
 	}
 
 	return s.settingRepo.SetMultiple(ctx, defaults)
@@ -525,6 +534,9 @@ func (s *SettingService) parseSettings(settings map[string]string) *SystemSettin
 			result.OpsMetricsIntervalSeconds = v
 		}
 	}
+
+	// Onboarding tour (default: false)
+	result.OnboardingEnabled = settings[SettingKeyOnboardingEnabled] == "true"
 
 	return result
 }

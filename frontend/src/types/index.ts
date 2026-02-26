@@ -92,6 +92,7 @@ export interface PublicSettings {
   purchase_subscription_url: string
   linuxdo_oauth_enabled: boolean
   version: string
+  onboarding_enabled: boolean
 }
 
 export interface AuthResponse {

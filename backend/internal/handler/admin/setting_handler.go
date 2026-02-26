@@ -89,6 +89,7 @@ func (h *SettingHandler) GetSettings(c *gin.Context) {
 		OpsRealtimeMonitoringEnabled:         settings.OpsRealtimeMonitoringEnabled,
 		OpsQueryModeDefault:                  settings.OpsQueryModeDefault,
 		OpsMetricsIntervalSeconds:            settings.OpsMetricsIntervalSeconds,
+		OnboardingEnabled:                    settings.OnboardingEnabled,
 	})
 }
 
@@ -154,6 +155,9 @@ type UpdateSettingsRequest struct {
 	OpsRealtimeMonitoringEnabled *bool   `json:"ops_realtime_monitoring_enabled"`
 	OpsQueryModeDefault          *string `json:"ops_query_mode_default"`
 	OpsMetricsIntervalSeconds    *int    `json:"ops_metrics_interval_seconds"`
+
+	// Onboarding tour
+	OnboardingEnabled bool `json:"onboarding_enabled"`
 }
 
 // UpdateSettings 更新系统设置
@@ -352,6 +356,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 			}
 			return previousSettings.OpsMetricsIntervalSeconds
 		}(),
+		OnboardingEnabled: req.OnboardingEnabled,
 	}
 
 	if err := h.settingService.UpdateSettings(c.Request.Context(), settings); err != nil {
@@ -413,6 +418,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		OpsRealtimeMonitoringEnabled:         updatedSettings.OpsRealtimeMonitoringEnabled,
 		OpsQueryModeDefault:                  updatedSettings.OpsQueryModeDefault,
 		OpsMetricsIntervalSeconds:            updatedSettings.OpsMetricsIntervalSeconds,
+		OnboardingEnabled:                    updatedSettings.OnboardingEnabled,
 	})
 }
 

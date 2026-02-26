@@ -3431,7 +3431,9 @@ export default {
         totp: '双因素认证 (2FA)',
         totpHint: '允许用户使用 Google Authenticator 等应用进行二次验证',
         totpKeyNotConfigured:
-          '请先在环境变量中配置 TOTP_ENCRYPTION_KEY。使用命令 openssl rand -hex 32 生成密钥。'
+          '请先在环境变量中配置 TOTP_ENCRYPTION_KEY。使用命令 openssl rand -hex 32 生成密钥。',
+        onboardingTour: '引导教程',
+        onboardingTourHint: '用户登录后自动弹出操作引导教程'
       },
       turnstile: {
         title: 'Cloudflare Turnstile',

@@ -59,6 +59,9 @@ type SystemSettings struct {
 	OpsRealtimeMonitoringEnabled bool
 	OpsQueryModeDefault          string
 	OpsMetricsIntervalSeconds    int
+
+	// Onboarding tour
+	OnboardingEnabled bool
 }
 
 type PublicSettings struct {
@@ -84,6 +87,9 @@ type PublicSettings struct {
 
 	LinuxDoOAuthEnabled bool
 	Version             string
+
+	// Onboarding tour
+	OnboardingEnabled bool
 }
 
 // StreamTimeoutSettings 流超时处理配置（仅控制超时后的处理方式，超时判定由网关配置控制）

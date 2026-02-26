@@ -170,6 +170,9 @@ const (
 
 	// SettingKeyStreamTimeoutSettings stores JSON config for stream timeout handling.
 	SettingKeyStreamTimeoutSettings = "stream_timeout_settings"
+
+	// Onboarding tour
+	SettingKeyOnboardingEnabled = "onboarding_enabled" // 是否在登录后自动显示引导教程
 )
 
 // AdminAPIKeyPrefix is the prefix for admin API keys (distinct from user "sk-" keys).

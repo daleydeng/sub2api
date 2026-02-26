@@ -66,6 +66,9 @@ export interface SystemSettings {
   ops_realtime_monitoring_enabled: boolean
   ops_query_mode_default: 'auto' | 'raw' | 'preagg' | string
   ops_metrics_interval_seconds: number
+
+  // Onboarding tour
+  onboarding_enabled: boolean
 }
 
 export interface UpdateSettingsRequest {
@@ -112,6 +115,7 @@ export interface UpdateSettingsRequest {
   ops_realtime_monitoring_enabled?: boolean
   ops_query_mode_default?: 'auto' | 'raw' | 'preagg' | string
   ops_metrics_interval_seconds?: number
+  onboarding_enabled?: boolean
 }
 
 /**

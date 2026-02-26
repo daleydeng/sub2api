@@ -57,6 +57,9 @@ type SystemSettings struct {
 	OpsRealtimeMonitoringEnabled bool   `json:"ops_realtime_monitoring_enabled"`
 	OpsQueryModeDefault          string `json:"ops_query_mode_default"`
 	OpsMetricsIntervalSeconds    int    `json:"ops_metrics_interval_seconds"`
+
+	// Onboarding tour
+	OnboardingEnabled bool `json:"onboarding_enabled"`
 }
 
 type PublicSettings struct {
@@ -80,6 +83,7 @@ type PublicSettings struct {
 	PurchaseSubscriptionURL     string `json:"purchase_subscription_url"`
 	LinuxDoOAuthEnabled         bool   `json:"linuxdo_oauth_enabled"`
 	Version                     string `json:"version"`
+	OnboardingEnabled           bool   `json:"onboarding_enabled"`
 }
 
 // StreamTimeoutSettings 流超时处理配置 DTO

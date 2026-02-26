@@ -52,5 +52,6 @@ func (h *SettingHandler) GetPublicSettings(c *gin.Context) {
 		PurchaseSubscriptionURL:     settings.PurchaseSubscriptionURL,
 		LinuxDoOAuthEnabled:         settings.LinuxDoOAuthEnabled,
 		Version:                     h.version,
+		OnboardingEnabled:           settings.OnboardingEnabled,
 	})
 }
