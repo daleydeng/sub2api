@@ -7,12 +7,17 @@ import { resolve } from 'path'
  * Vite 插件：开发模式下注入公开配置到 index.html
  * 与生产模式的后端注入行为保持一致，消除闪烁
  */
-function injectPublicSettings(backendUrl: string): Plugin {
+/**
+ * 仅在开发模式下注入公开配置，消除首屏闪烁。
+ * 生产构建（build 模式）跳过，由 Go embed 服务端在请求时注入（附带正确的 CSP nonce）。
+ */
+function injectPublicSettings(backendUrl: string, isDev: boolean): Plugin {
   return {
     name: 'inject-public-settings',
     transformIndexHtml: {
       order: 'pre',
       async handler(html) {
+        if (!isDev) return html
         try {
           const response = await fetch(`${backendUrl}/api/v1/settings/public`, {
             signal: AbortSignal.timeout(2000),
@@ -40,6 +45,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const backendUrl = env.VITE_DEV_PROXY_TARGET || 'http://localhost:8080'
   const devPort = Number(env.VITE_DEV_PORT || 3000)
+  const isDev = mode === 'development'
 
   return {
     plugins: [
@@ -49,7 +55,7 @@ export default defineConfig(({ mode }) => {
         },
       }),
       tailwindcss(),
-      injectPublicSettings(backendUrl),
+      injectPublicSettings(backendUrl, isDev),
     ],
     resolve: {
       alias: {

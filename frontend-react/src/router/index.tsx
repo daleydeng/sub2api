@@ -4,6 +4,7 @@ import {
   createRoute,
   lazyRouteComponent,
   Outlet,
+  redirect,
 } from '@tanstack/react-router'
 import { useAuthStore } from '@/stores/auth'
 import AppLayout from '@/components/layout/AppLayout'
@@ -20,6 +21,9 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
+  beforeLoad: () => {
+    throw redirect({ to: '/home' })
+  },
 })
 
 const homeRoute = createRoute({
