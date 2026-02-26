@@ -8,6 +8,10 @@
 import { useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { ClipboardIcon, CheckIcon } from '@/components/icons'
 
 export default function OAuthCallbackView() {
@@ -32,60 +36,55 @@ export default function OAuthCallbackView() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-dark-950">
       <div className="w-full max-w-lg">
-        <div className="card p-6">
-          <h1 className="mb-6 text-lg font-semibold text-gray-900 dark:text-white">
-            {t('oauth.title', 'OAuth Callback')}
-          </h1>
-
-          {errorParam ? (
-            <div className="rounded-lg bg-red-50 p-4 dark:bg-red-900/20">
-              <p className="font-medium text-red-600 dark:text-red-400">{errorParam}</p>
-              {errorDescription && (
-                <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errorDescription}</p>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t('oauth.authorizationCode', 'Authorization Code')}
-                </label>
-                <div className="flex items-center gap-2">
-                  <input type="text" value={code} readOnly className="input-field flex-1 font-mono text-sm" />
-                  <button onClick={() => copyToClipboard(code, 'code')} className="btn-ghost btn-icon flex-shrink-0" title="Copy">
-                    {copied === 'code' ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ClipboardIcon className="h-4 w-4" />}
-                  </button>
-                </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('oauth.title', 'OAuth Callback')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {errorParam ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800/50 dark:bg-red-900/20">
+                <p className="font-medium text-red-600 dark:text-red-400">{errorParam}</p>
+                {errorDescription && (
+                  <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errorDescription}</p>
+                )}
               </div>
-
-              {state && (
-                <div>
-                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {t('oauth.state', 'State')}
-                  </label>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>{t('oauth.authorizationCode', 'Authorization Code')}</Label>
                   <div className="flex items-center gap-2">
-                    <input type="text" value={state} readOnly className="input-field flex-1 font-mono text-sm" />
-                    <button onClick={() => copyToClipboard(state, 'state')} className="btn-ghost btn-icon flex-shrink-0" title="Copy">
-                      {copied === 'state' ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ClipboardIcon className="h-4 w-4" />}
-                    </button>
+                    <Input value={code} readOnly className="flex-1 font-mono text-sm" />
+                    <Button variant="ghost" size="icon" onClick={() => copyToClipboard(code, 'code')} title="Copy">
+                      {copied === 'code' ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ClipboardIcon className="h-4 w-4" />}
+                    </Button>
                   </div>
                 </div>
-              )}
 
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t('oauth.callbackUrl', 'Callback URL')}
-                </label>
-                <div className="flex items-center gap-2">
-                  <input type="text" value={fullUrl} readOnly className="input-field flex-1 font-mono text-xs" />
-                  <button onClick={() => copyToClipboard(fullUrl, 'url')} className="btn-ghost btn-icon flex-shrink-0" title="Copy">
-                    {copied === 'url' ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ClipboardIcon className="h-4 w-4" />}
-                  </button>
+                {state && (
+                  <div className="space-y-2">
+                    <Label>{t('oauth.state', 'State')}</Label>
+                    <div className="flex items-center gap-2">
+                      <Input value={state} readOnly className="flex-1 font-mono text-sm" />
+                      <Button variant="ghost" size="icon" onClick={() => copyToClipboard(state, 'state')} title="Copy">
+                        {copied === 'state' ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ClipboardIcon className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label>{t('oauth.callbackUrl', 'Callback URL')}</Label>
+                  <div className="flex items-center gap-2">
+                    <Input value={fullUrl} readOnly className="flex-1 font-mono text-xs" />
+                    <Button variant="ghost" size="icon" onClick={() => copyToClipboard(fullUrl, 'url')} title="Copy">
+                      {copied === 'url' ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ClipboardIcon className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

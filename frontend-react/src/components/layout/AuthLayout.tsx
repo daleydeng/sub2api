@@ -30,7 +30,7 @@ export default function AuthLayout({ children, footer, subtitle }: Props) {
   }, [fetchPublicSettings])
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+    <div className="relative flex min-h-screen items-start justify-center overflow-x-hidden p-4 py-8 sm:items-center">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950" />
 

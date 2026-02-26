@@ -9,6 +9,7 @@ import { getPublicSettings, validatePromoCode, validateInvitationCode } from '@/
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, GiftIcon, KeyIcon, CheckIcon } from '@/components/icons'
 
 export default function RegisterView() {
@@ -158,10 +159,10 @@ export default function RegisterView() {
 
   return (
     <AuthLayout footer={footer}>
-      <div className="space-y-6">
+      <div className="space-y-5">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('auth.createAccount')}</h2>
-          <p className="mt-2 text-sm text-gray-500 dark:text-dark-400">{t('auth.signUpToStart', { siteName })}</p>
+          <p className="mt-1.5 text-sm text-gray-500 dark:text-dark-400">{t('auth.signUpToStart', { siteName })}</p>
         </div>
 
         {linuxdoOAuthEnabled && (
@@ -173,9 +174,10 @@ export default function RegisterView() {
               </svg>
               {t('auth.loginWithLinuxDo', 'Sign up with LinuxDo')}
             </a>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200 dark:border-dark-700" /></div>
-              <div className="relative flex justify-center text-sm"><span className="bg-white px-4 text-gray-500 dark:bg-dark-800/50 dark:text-dark-400">{t('auth.orContinueWith', 'or continue with')}</span></div>
+            <div className="flex items-center gap-3">
+              <Separator className="flex-1" />
+              <span className="text-sm text-gray-500 dark:text-dark-400">{t('auth.orContinueWith', 'or continue with')}</span>
+              <Separator className="flex-1" />
             </div>
           </div>
         )}
@@ -188,10 +190,10 @@ export default function RegisterView() {
             </div>
           </div>
         ) : (
-          <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }} className="space-y-5">
+          <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }} className="space-y-4">
             <form.Field name="email">
               {(field) => (
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="reg-email">{t('auth.emailLabel')}</Label>
                   <div className="relative">
                     <EnvelopeIcon className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -203,7 +205,7 @@ export default function RegisterView() {
 
             <form.Field name="password">
               {(field) => (
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="reg-password">{t('auth.passwordLabel')}</Label>
                   <div className="relative">
                     <LockClosedIcon className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
@@ -212,13 +214,13 @@ export default function RegisterView() {
                       {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                     </button>
                   </div>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-dark-400">{t('auth.passwordHint')}</p>
+                  <p className="text-xs text-muted-foreground">{t('auth.passwordHint')}</p>
                 </div>
               )}
             </form.Field>
 
             {invitationCodeEnabled && (
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="invitation_code">{t('auth.invitationCodeLabel')}</Label>
                 <div className="relative">
                   <KeyIcon className={`absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 ${invitationValidation.valid ? 'text-green-500' : 'text-gray-400'}`} />
@@ -229,14 +231,17 @@ export default function RegisterView() {
                     {!invitationValidating && invitationValidation.invalid && <svg className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>}
                   </div>
                 </div>
-                {invitationValidation.valid && <div className="mt-2 rounded-lg bg-green-50 px-3 py-2 dark:bg-green-900/20"><span className="text-sm text-green-700 dark:text-green-400">{t('auth.invitationCodeValid')}</span></div>}
-                {invitationValidation.invalid && <p className="mt-1 text-sm text-red-500">{invitationValidation.message}</p>}
+                {invitationValidation.valid && <p className="text-sm text-green-600 dark:text-green-400">{t('auth.invitationCodeValid')}</p>}
+                {invitationValidation.invalid && <p className="text-sm text-destructive">{invitationValidation.message}</p>}
               </div>
             )}
 
             {promoCodeEnabled && (
-              <div>
-                <Label htmlFor="promo_code">{t('auth.promoCodeLabel')} <span className="ml-1 text-xs font-normal text-gray-400">({t('common.optional')})</span></Label>
+              <div className="space-y-2">
+                <Label htmlFor="promo_code">
+                  {t('auth.promoCodeLabel')}
+                  <span className="text-xs font-normal text-muted-foreground">({t('common.optional')})</span>
+                </Label>
                 <div className="relative">
                   <GiftIcon className={`absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 ${promoValidation.valid ? 'text-green-500' : 'text-gray-400'}`} />
                   <Input id="promo_code" value={form.state.values.promoCode} onChange={(e) => handlePromoCodeInput(e.target.value)} disabled={isLoading} className={`pl-11 pr-10 ${promoValidation.valid ? 'border-green-500' : promoValidation.invalid ? 'border-red-500' : ''}`} placeholder={t('auth.promoCodePlaceholder')} />
@@ -246,8 +251,13 @@ export default function RegisterView() {
                     {!promoValidating && promoValidation.invalid && <svg className="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>}
                   </div>
                 </div>
-                {promoValidation.valid && <div className="mt-2 flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 dark:bg-green-900/20"><GiftIcon className="h-4 w-4 text-green-600" /><span className="text-sm text-green-700 dark:text-green-400">{t('auth.promoCodeValid', { amount: promoValidation.bonusAmount?.toFixed(2) })}</span></div>}
-                {promoValidation.invalid && <p className="mt-1 text-sm text-red-500">{promoValidation.message}</p>}
+                {promoValidation.valid && (
+                  <p className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
+                    <GiftIcon className="h-4 w-4" />
+                    {t('auth.promoCodeValid', { amount: promoValidation.bonusAmount?.toFixed(2) })}
+                  </p>
+                )}
+                {promoValidation.invalid && <p className="text-sm text-destructive">{promoValidation.message}</p>}
               </div>
             )}
 

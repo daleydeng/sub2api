@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon } from '@/components/icons'
 
 export default function LoginView() {
@@ -173,11 +174,10 @@ export default function LoginView() {
                 </svg>
                 {t('auth.loginWithLinuxDo', 'Login with LinuxDo')}
               </a>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200 dark:border-dark-700" /></div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="bg-white px-4 text-gray-500 dark:bg-dark-800/50 dark:text-dark-400">{t('auth.orContinueWith', 'or continue with')}</span>
-                </div>
+              <div className="flex items-center gap-3">
+                <Separator className="flex-1" />
+                <span className="text-sm text-gray-500 dark:text-dark-400">{t('auth.orContinueWith', 'or continue with')}</span>
+                <Separator className="flex-1" />
               </div>
             </div>
           )}

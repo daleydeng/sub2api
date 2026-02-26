@@ -7,6 +7,7 @@ import AuthLayout from '@/components/layout/AuthLayout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { EnvelopeIcon } from '@/components/icons'
 
 export default function ForgotPasswordView() {
   const { t } = useTranslation()
@@ -38,26 +39,33 @@ export default function ForgotPasswordView() {
             </svg>
           </div>
           <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{t('forgotPassword.emailSent', 'Check your email')}</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('forgotPassword.emailSentDescription', 'We sent a password reset link to your email address.')}</p>
+          <p className="text-sm text-muted-foreground">{t('forgotPassword.emailSentDescription', 'We sent a password reset link to your email address.')}</p>
         </div>
       ) : (
-        <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }} className="space-y-6">
-          <p className="text-sm text-gray-500 dark:text-gray-400">{t('forgotPassword.description', 'Enter your email address and we will send you a link to reset your password.')}</p>
+        <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }} className="space-y-5">
+          <p className="text-sm text-muted-foreground">{t('forgotPassword.description', 'Enter your email address and we will send you a link to reset your password.')}</p>
 
-          {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">{error}</div>}
+          {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-400">{error}</div>
+          )}
 
           <form.Field name="email">
             {(field) => (
-              <div>
-                <Label>{t('common.email', 'Email')}</Label>
-                <Input
-                  type="email"
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  autoFocus
-                  placeholder={t('forgotPassword.emailPlaceholder', 'Enter your email')}
-                />
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email">{t('common.email', 'Email')}</Label>
+                <div className="relative">
+                  <EnvelopeIcon className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    id="forgot-email"
+                    type="email"
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    autoFocus
+                    className="pl-11"
+                    placeholder={t('forgotPassword.emailPlaceholder', 'Enter your email')}
+                  />
+                </div>
               </div>
             )}
           </form.Field>

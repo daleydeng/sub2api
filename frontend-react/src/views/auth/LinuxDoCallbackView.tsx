@@ -9,6 +9,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth'
 import { sanitizeUrl } from '@/utils/url'
+import { Button } from '@/components/ui/button'
 
 function parseHashParams(): Record<string, string> {
   const hash = window.location.hash.substring(1)
@@ -76,14 +77,14 @@ export default function LinuxDoCallbackView() {
               </svg>
             </div>
             <p className="mb-4 text-red-600 dark:text-red-400">{error}</p>
-            <button onClick={() => navigate({ to: '/login' })} className="btn-primary px-6 py-2.5 text-sm">
+            <Button onClick={() => navigate({ to: '/login' })}>
               {t('linuxdoCallback.backToLogin', 'Back to Login')}
-            </button>
+            </Button>
           </>
         ) : (
           <>
             <div className="spinner mx-auto mb-4 h-8 w-8" />
-            <p className="text-gray-600 dark:text-gray-400">{status}</p>
+            <p className="text-muted-foreground">{status}</p>
           </>
         )}
       </div>

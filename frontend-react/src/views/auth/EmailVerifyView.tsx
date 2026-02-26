@@ -11,6 +11,8 @@ import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { authAPI } from '@/api/auth'
 import AuthLayout from '@/components/layout/AuthLayout'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function EmailVerifyView() {
   const { t } = useTranslation()
@@ -140,12 +142,12 @@ export default function EmailVerifyView() {
           <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
             {t('emailVerify.sessionExpired', 'Session expired')}
           </h3>
-          <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mb-4 text-sm text-muted-foreground">
             {t('emailVerify.sessionExpiredDescription', 'Please go back and start the registration again.')}
           </p>
-          <Link to="/register" className="btn-primary inline-block px-6 py-2.5 text-sm">
-            {t('emailVerify.backToRegister', 'Back to Register')}
-          </Link>
+          <Button asChild>
+            <Link to="/register">{t('emailVerify.backToRegister', 'Back to Register')}</Link>
+          </Button>
         </div>
       </AuthLayout>
     )
@@ -161,19 +163,19 @@ export default function EmailVerifyView() {
       }
     >
       <div className="space-y-6">
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-center text-sm text-muted-foreground">
           {t('emailVerify.description', 'Enter the 6-digit code sent to')} <strong className="text-gray-900 dark:text-white">{regData?.email}</strong>
         </p>
 
         {error && (
-          <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-400">
             {error}
           </div>
         )}
 
         <div className="flex justify-center gap-2" onPaste={handlePaste}>
           {code.map((digit, i) => (
-            <input
+            <Input
               key={i}
               ref={(el) => { inputRefs.current[i] = el }}
               type="text"
@@ -182,33 +184,30 @@ export default function EmailVerifyView() {
               value={digit}
               onChange={(e) => handleInput(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
-              className="h-12 w-12 rounded-lg border border-gray-300 text-center text-xl font-bold text-gray-900 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-dark-600 dark:bg-dark-800 dark:text-white dark:focus:border-primary-400 dark:focus:ring-primary-800"
+              className="h-12 w-12 text-center text-xl font-bold"
               autoFocus={i === 0}
               disabled={loading}
             />
           ))}
         </div>
 
-        <button onClick={() => handleVerify()} disabled={loading || code.some((d) => !d)} className="btn-primary w-full py-2.5">
+        <Button onClick={() => handleVerify()} disabled={loading || code.some((d) => !d)} className="w-full">
           {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <div className="spinner h-4 w-4" />
-              {t('emailVerify.verifying', 'Verifying...')}
-            </span>
+            <><div className="spinner mr-2 h-4 w-4" />{t('emailVerify.verifying', 'Verifying...')}</>
           ) : (
             t('emailVerify.verify', 'Verify & Create Account')
           )}
-        </button>
+        </Button>
 
         <div className="text-center">
           {countdown > 0 ? (
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-sm text-muted-foreground">
               {t('emailVerify.resendIn', 'Resend in')} {countdown}s
             </span>
           ) : (
-            <button onClick={sendCode} disabled={resendLoading} className="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400">
+            <Button variant="link" onClick={sendCode} disabled={resendLoading} className="text-sm">
               {resendLoading ? t('common.loading', 'Loading...') : t('emailVerify.resend', 'Resend Code')}
-            </button>
+            </Button>
           )}
         </div>
       </div>

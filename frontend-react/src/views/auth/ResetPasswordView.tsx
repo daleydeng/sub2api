@@ -7,7 +7,7 @@ import AuthLayout from '@/components/layout/AuthLayout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { EyeIcon, EyeSlashIcon } from '@/components/icons'
+import { EyeIcon, EyeSlashIcon, LockClosedIcon } from '@/components/icons'
 
 export default function ResetPasswordView() {
   const { t } = useTranslation()
@@ -57,8 +57,10 @@ export default function ResetPasswordView() {
             </svg>
           </div>
           <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{t('resetPassword.invalidLink', 'Invalid or expired link')}</h3>
-          <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">{t('resetPassword.invalidLinkDescription', 'This password reset link is invalid or has expired.')}</p>
-          <Link to="/forgot-password" className="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400">{t('resetPassword.requestNewLink', 'Request a new link')}</Link>
+          <p className="mb-4 text-sm text-muted-foreground">{t('resetPassword.invalidLinkDescription', 'This password reset link is invalid or has expired.')}</p>
+          <Button asChild variant="default">
+            <Link to="/forgot-password">{t('resetPassword.requestNewLink', 'Request a new link')}</Link>
+          </Button>
         </div>
       </AuthLayout>
     )
@@ -74,33 +76,39 @@ export default function ResetPasswordView() {
             </svg>
           </div>
           <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{t('resetPassword.success', 'Password reset successfully')}</h3>
-          <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">{t('resetPassword.successDescription', 'Your password has been updated. You can now log in with your new password.')}</p>
-          <Link to="/login" className="btn-primary inline-block px-6 py-2.5 text-sm">{t('resetPassword.goToLogin', 'Go to Login')}</Link>
+          <p className="mb-4 text-sm text-muted-foreground">{t('resetPassword.successDescription', 'Your password has been updated. You can now log in with your new password.')}</p>
+          <Button asChild>
+            <Link to="/login">{t('resetPassword.goToLogin', 'Go to Login')}</Link>
+          </Button>
         </div>
       ) : (
-        <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }} className="space-y-6">
-          {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">{error}</div>}
+        <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit() }} className="space-y-5">
+          {error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-400">{error}</div>
+          )}
 
-          <div>
+          <div className="space-y-2">
             <Label>{t('common.email', 'Email')}</Label>
             <Input value={email} readOnly disabled className="bg-gray-50 dark:bg-dark-800" />
           </div>
 
           <form.Field name="password">
             {(field) => (
-              <div>
-                <Label>{t('resetPassword.newPassword', 'New Password')}</Label>
+              <div className="space-y-2">
+                <Label htmlFor="reset-password">{t('resetPassword.newPassword', 'New Password')}</Label>
                 <div className="relative">
+                  <LockClosedIcon className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   <Input
+                    id="reset-password"
                     type={showPassword ? 'text' : 'password'}
                     value={field.state.value}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
-                    className="pr-10"
+                    className="pl-11 pr-11"
                     placeholder={t('resetPassword.passwordPlaceholder', 'Enter new password')}
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                    {showPassword ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-dark-300">
+                    {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
                   </button>
                 </div>
               </div>
@@ -109,15 +117,20 @@ export default function ResetPasswordView() {
 
           <form.Field name="confirmPassword">
             {(field) => (
-              <div>
-                <Label>{t('resetPassword.confirmPassword', 'Confirm Password')}</Label>
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  value={field.state.value}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  onBlur={field.handleBlur}
-                  placeholder={t('resetPassword.confirmPasswordPlaceholder', 'Confirm new password')}
-                />
+              <div className="space-y-2">
+                <Label htmlFor="reset-confirm">{t('resetPassword.confirmPassword', 'Confirm Password')}</Label>
+                <div className="relative">
+                  <LockClosedIcon className="absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    id="reset-confirm"
+                    type={showPassword ? 'text' : 'password'}
+                    value={field.state.value}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    className="pl-11"
+                    placeholder={t('resetPassword.confirmPasswordPlaceholder', 'Confirm new password')}
+                  />
+                </div>
               </div>
             )}
           </form.Field>
