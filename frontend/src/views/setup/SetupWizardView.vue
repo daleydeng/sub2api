@@ -110,7 +110,7 @@
                 v-model="formData.database.user"
                 type="text"
                 class="input"
-                placeholder="postgres"
+                placeholder="e.g. sub2api"
               />
             </div>
             <div>
@@ -131,7 +131,7 @@
                 v-model="formData.database.dbname"
                 type="text"
                 class="input"
-                placeholder="sub2api"
+                placeholder="e.g. sub2api"
               />
             </div>
             <div>
@@ -533,9 +533,9 @@ const formData = reactive<InstallRequest>({
   database: {
     host: 'localhost',
     port: 5432,
-    user: 'postgres',
+    user: '',
     password: '',
-    dbname: 'sub2api',
+    dbname: '',
     sslmode: 'disable'
   },
   redis: {
