@@ -132,7 +132,7 @@ services:
   # PostgreSQL Database
   # ===========================================================================
   postgres:
-    image: postgres:18-alpine
+    image: docker.io/library/postgres:18-alpine
     container_name: sub2api-postgres
     restart: unless-stopped
     ulimits:
@@ -150,6 +150,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       - POSTGRES_DB=${POSTGRES_DB:-sub2api}
       - TZ=${TZ:-Asia/Shanghai}
+    ports:
+      - "127.0.0.1:5432:5432"
     networks:
       - sub2api-network
     healthcheck:
@@ -165,7 +167,7 @@ services:
   # Redis Cache
   # ===========================================================================
   redis:
-    image: redis:8-alpine
+    image: docker.io/library/redis:8-alpine
     container_name: sub2api-redis
     restart: unless-stopped
     ulimits:
@@ -179,11 +181,12 @@ services:
       --save 60 1
       --appendonly yes
       --appendfsync everysec
-      ${REDIS_PASSWORD:+--requirepass ${REDIS_PASSWORD}}
     environment:
       - TZ=${TZ:-Asia/Shanghai}
       # REDISCLI_AUTH is used by redis-cli for authentication (safer than -a flag)
       - REDISCLI_AUTH=${REDIS_PASSWORD:-}
+    ports:
+      - "127.0.0.1:6379:6379"
     networks:
       - sub2api-network
     healthcheck:

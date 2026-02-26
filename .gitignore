@@ -124,6 +124,8 @@ openspec/
 code-reviews/
 AGENTS.md
 backend/cmd/server/server
+backend/cmd/install/install
+backend/install
 deploy/docker-compose.override.yml
 .gocache/
 vite.config.js
