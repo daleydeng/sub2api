@@ -470,7 +470,7 @@ type ForwardResult struct {
 	FirstTokenMs     *int // 首字时间（流式请求）
 	ClientDisconnect bool // 客户端是否在流式传输过程中断开
 
-	// 图片生成计费字段（仅 gemini-3-pro-image 使用）
+	// 图片生成计费字段（图片生成模型使用）
 	ImageCount int    // 生成的图片数量
 	ImageSize  string // 图片尺寸 "1K", "2K", "4K"
 
@@ -6015,9 +6015,10 @@ func (s *GatewayService) ForwardCountTokens(ctx context.Context, c *gin.Context,
 		body, reqModel = normalizeClaudeOAuthRequestBody(body, reqModel, normalizeOpts)
 	}
 
-	// Antigravity 账户不支持 count_tokens 转发，直接返回空值
+	// Antigravity 账户不支持 count_tokens，返回 404 让客户端 fallback 到本地估算。
+	// 返回 nil 避免 handler 层记录为错误，也不设置 ops 上游错误上下文。
 	if account.Platform == PlatformAntigravity {
-		c.JSON(http.StatusOK, gin.H{"input_tokens": 0})
+		s.countTokensError(c, http.StatusNotFound, "not_found_error", "count_tokens endpoint is not supported for this platform")
 		return nil
 	}
 
@@ -6222,12 +6223,13 @@ func (s *GatewayService) forwardCountTokensAnthropicAPIKeyPassthrough(ctx contex
 		upstreamMsg := strings.TrimSpace(extractUpstreamErrorMessage(respBody))
 		upstreamMsg = sanitizeUpstreamErrorMessage(upstreamMsg)
 
-		// 中转站不支持 count_tokens 端点时（404），降级返回空值，客户端会 fallback 到本地估算。
+		// 中转站不支持 count_tokens 端点时（404），返回 404 让客户端 fallback 到本地估算。
+		// 返回 nil 避免 handler 层记录为错误，也不设置 ops 上游错误上下文。
 		if resp.StatusCode == http.StatusNotFound {
 			logger.LegacyPrintf("service.gateway",
-				"[count_tokens] Upstream does not support count_tokens (404), returning fallback: account=%d name=%s msg=%s",
+				"[count_tokens] Upstream does not support count_tokens (404), returning 404: account=%d name=%s msg=%s",
 				account.ID, account.Name, truncateString(upstreamMsg, 512))
-			c.JSON(http.StatusOK, gin.H{"input_tokens": 0})
+			s.countTokensError(c, http.StatusNotFound, "not_found_error", "count_tokens endpoint is not supported by upstream")
 			return nil
 		}
 

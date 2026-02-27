@@ -24,6 +24,8 @@ const openaiModels = [
   // GPT-5.2 系列
   'gpt-5.2', 'gpt-5.2-2025-12-11', 'gpt-5.2-chat-latest',
   'gpt-5.2-codex', 'gpt-5.2-pro', 'gpt-5.2-pro-2025-12-11',
+  // GPT-5.3 系列
+  'gpt-5.3-codex', 'gpt-5.3-codex-spark',
   'chatgpt-4o-latest',
   'gpt-4o-audio-preview', 'gpt-4o-realtime-preview'
 ]
@@ -89,10 +91,10 @@ const antigravityModels = [
   'gemini-3-flash',
   'gemini-3-pro-high',
   'gemini-3-pro-low',
-  'gemini-3-pro-image',
   // Gemini 3.1 系列
   'gemini-3.1-pro-high',
   'gemini-3.1-pro-low',
+  'gemini-3.1-flash-image',
   // 其他
   'gpt-oss-120b-medium',
   'tab_flash_lite_preview'
