@@ -82,7 +82,11 @@ func (s *SoraMediaStorage) refreshConfig() {
 	}
 	root := strings.TrimSpace(s.cfg.Sora.Storage.LocalPath)
 	if root == "" {
-		root = soraStorageDefaultRoot
+		if dataDir := os.Getenv("DATA_DIR"); dataDir != "" {
+			root = filepath.Join(dataDir, "sora")
+		} else {
+			root = soraStorageDefaultRoot
+		}
 	}
 	root = filepath.Clean(root)
 	if !filepath.IsAbs(root) {

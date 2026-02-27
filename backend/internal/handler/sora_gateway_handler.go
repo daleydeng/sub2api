@@ -58,6 +58,9 @@ func NewSoraGatewayHandler(
 	soraTLSEnabled := true
 	signKey := ""
 	mediaRoot := "/app/data/sora"
+	if dataDir := os.Getenv("DATA_DIR"); dataDir != "" {
+		mediaRoot = filepath.Join(dataDir, "sora")
+	}
 	if cfg != nil {
 		pingInterval = time.Duration(cfg.Concurrency.PingInterval) * time.Second
 		if cfg.Gateway.MaxAccountSwitches > 0 {

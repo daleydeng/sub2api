@@ -8,6 +8,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -23,27 +25,30 @@ import (
 
 // Config paths
 const (
-	ConfigFileName  = "config.yaml"
-	InstallLockFile = ".installed"
+	ConfigFileName      = "config.yaml"
+	InstallLockFile     = ".installed"
+	DefaultDockerDataDir = "/app/data" // Docker volume mount point
 )
 
 // GetDataDir returns the data directory for storing config and lock files.
-// Priority: DATA_DIR env > /app/data (if exists and writable) > current directory
+// Priority: DATA_DIR env > /app/data (Docker on Linux) > current directory
 func GetDataDir() string {
 	// Check DATA_DIR environment variable first
 	if dir := os.Getenv("DATA_DIR"); dir != "" {
 		return dir
 	}
 
-	// Check if /app/data exists and is writable (Docker environment)
-	dockerDataDir := "/app/data"
-	if info, err := os.Stat(dockerDataDir); err == nil && info.IsDir() {
-		// Try to check if writable by creating a temp file
-		testFile := dockerDataDir + "/.write_test"
-		if f, err := os.Create(testFile); err == nil {
-			_ = f.Close()
-			_ = os.Remove(testFile)
-			return dockerDataDir
+	// Check if Docker data dir exists and is writable (Linux only;
+	// on Windows /app/data resolves to e.g. D:\app\data which may
+	// coincidentally exist and cause false positives)
+	if runtime.GOOS == "linux" {
+		if info, err := os.Stat(DefaultDockerDataDir); err == nil && info.IsDir() {
+			testFile := DefaultDockerDataDir + "/.write_test"
+			if f, err := os.Create(testFile); err == nil {
+				_ = f.Close()
+				_ = os.Remove(testFile)
+				return DefaultDockerDataDir
+			}
 		}
 	}
 
@@ -482,7 +487,11 @@ func writeConfigFile(cfg *SetupConfig) error {
 		return err
 	}
 
-	return os.WriteFile(GetConfigFilePath(), data, 0600)
+	configPath := GetConfigFilePath()
+	if err := os.MkdirAll(filepath.Dir(configPath), 0755); err != nil {
+		return fmt.Errorf("failed to create data directory: %w", err)
+	}
+	return os.WriteFile(configPath, data, 0600)
 }
 
 func generateSecret(length int) (string, error) {
