@@ -104,6 +104,13 @@ backend/internal/web/dist/*
 # 后端运行时缓存数据
 backend/data/
 
+# Local development database data
+.dev-data/
+*.rdb
+
+# Local development env (contains credentials)
+.env.dev
+
 # ===================
 # 本地配置文件（包含敏感信息）
 # ===================
@@ -118,7 +125,6 @@ tests
 CLAUDE.md
 AGENTS.md
 .claude
-scripts
 .code-review-state
 openspec/
 code-reviews/
@@ -134,4 +140,3 @@ docs/*
 .codex/
 frontend/coverage/
 aicodex
-

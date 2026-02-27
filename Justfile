@@ -1,137 +1,152 @@
-# sub2api Justfile — 直接用 `just <recipe>` 执行
-# node/go/pnpm 由 pixi 提供，just/cargo 在系统 PATH
+# sub2api Justfile - Development & Build Tasks
+# Tools provided by pixi: node/go/pnpm
 
-set dotenv-path := "deploy/.env"
+set dotenv-path := ".env.dev"
+set dotenv-load := true
+set dotenv-override := true
+set shell := ["bash", "-euo", "pipefail", "-c"]
+set windows-shell := ["sh", "-euo", "pipefail", "-c"]
 
-proxy := "http_proxy=http://127.0.0.1:7897 https_proxy=http://127.0.0.1:7897"
+# Project root directory (absolute) — used to resolve relative paths in .env.dev
+root := justfile_directory()
 
-# 默认列出所有 recipes
+# Re-export paths as absolute so they work under any [working-directory]
+export DATA_DIR  := root / ".dev-data" / "app"
+export PGDATA    := root / ".dev-data" / "postgres"
+export REDIS_DIR := root / ".dev-data" / "redis"
+
+# List all recipes
 default:
     @just --list
 
-# ── 环境 ──────────────────────────────────────────
+# ── Development Database ────────────────────────
 
-# 安装系统依赖（podman）
-sys-install:
-    sudo dnf install -y podman
+# Initialize PostgreSQL data directory (first time only)
+db-init:
+    rust-script scripts/dbmgr.rs pg init
 
-# ── 开发基础设施（PostgreSQL + Redis）─────────────
+# Start PostgreSQL and Redis
+db-up:
+    rust-script scripts/dbmgr.rs up
 
-# 启动开发所需的数据库服务
-dev-up:
-    {{ proxy }} pixi run podman-compose -f deploy/docker-compose-test.yml up -d postgres redis
+# Stop PostgreSQL and Redis
+db-down:
+    rust-script scripts/dbmgr.rs down
 
-# 停止数据库服务
-dev-down:
-    pixi run podman-compose -f deploy/docker-compose-test.yml down
+# Show PostgreSQL and Redis status
+db-status:
+    rust-script scripts/dbmgr.rs pg status
+    rust-script scripts/dbmgr.rs redis status
 
-# 首次安装（建表 + 创建管理员账户），直接调用 Go，无需后端进程在线
+# Check PostgreSQL and Redis are running (exits non-zero if not)
+db-check:
+    rust-script scripts/dbmgr.rs pg check
+    rust-script scripts/dbmgr.rs redis check
+
+# Initialize database schema and admin account
 [working-directory('backend')]
-dev-install:
+db-install:
     pixi run go run ./cmd/install
 
-# 重置数据库（删除卷后重启，会重新初始化）
-dev-reset-db:
-    just dev-down
-    podman volume rm -f deploy_postgres_data
-    rm -f backend/.installed backend/config.yaml
-    just dev-up
+# Reset database (wipe data and reinitialize)
+db-reset:
+    rust-script scripts/dbmgr.rs reset
+    rm -rf "$DATA_DIR"
+    just db-install
 
-# 完整重置：重置 DB + 直接安装（无需启停后端）
-dev-fresh:
-    just dev-reset-db
-    just dev-install
-    @echo "Done! Run 'just be-dev' to start the backend."
+# ── Development Servers ─────────────────────────
 
-# 清理残留容器和镜像
-dev-clean:
-    podman rm -f sub2api-postgres sub2api-redis || true
-    podman system prune -f
-
-# ── 开发服务器 ────────────────────────────────────
-
-# 启动后端开发服务器
+# Start backend development server
 [working-directory('backend')]
-be-dev:
-    {{ proxy }} pixi run go run ./cmd/server
+dev-be:
+    pixi run go run ./cmd/server
 
-# ── 前端（Vue）─────────────────────────────────────
+# ── Frontend (Vue) ───────────────────────────────
 
-# 安装 Vue 前端依赖
-fe-vue-install:
-    pixi run pnpm --dir frontend install
+# Install Vue frontend dependencies
+[working-directory('frontend')]
+dev-install-vue:
+    pixi run pnpm install
 
-# 启动 Vue 前端开发服务器
-fe-vue-dev:
-    pixi run pnpm --dir frontend run dev
+# Start Vue frontend development server
+[working-directory('frontend')]
+dev-vue:
+    pixi run pnpm run dev
 
-# 编译 Vue 前端
-build-fe-vue:
-    pixi run pnpm --dir frontend run build
+# Build Vue frontend
+[working-directory('frontend')]
+build-vue:
+    pixi run pnpm run build
 
-# Vue 前端 lint + 类型检查
-test-fe-vue:
-    pixi run pnpm --dir frontend run lint:check
-    pixi run pnpm --dir frontend run typecheck
+# Vue frontend lint + type check
+[working-directory('frontend')]
+test-vue:
+    pixi run pnpm run lint:check
+    pixi run pnpm run typecheck
 
-# ── 前端（React）───────────────────────────────────
+# ── Frontend (React) ────────────────────────────
 
-# 安装 React 前端依赖
-fe-react-install:
-    pixi run pnpm --dir frontend-react install
+# Install React frontend dependencies
+[working-directory('frontend-react')]
+dev-install-react:
+    pixi run pnpm install
 
-# 启动 React 前端开发服务器
-fe-react-dev:
-    pixi run pnpm --dir frontend-react run dev
+# Start React frontend development server
+[working-directory('frontend-react')]
+dev-react:
+    pixi run pnpm run dev
 
-# 编译 React 前端（输出到 backend/internal/web/dist/）
-build-fe-react:
-    pixi run pnpm --dir frontend-react run build
+# Build React frontend (output to backend/internal/web/dist/)
+[working-directory('frontend-react')]
+build-react:
+    pixi run pnpm run build
 
-# React 前端 lint + 类型检查
-test-fe-react:
-    pixi run pnpm --dir frontend-react run lint
-    pixi run pnpm --dir frontend-react run build
+# React frontend lint + type check
+[working-directory('frontend-react')]
+test-react:
+    pixi run pnpm run lint
+    pixi run pnpm run build
 
-# ── 构建 ──────────────────────────────────────────
+# ── Build ───────────────────────────────────────
 
-# 编译前后端（默认 Vue）
-build: build-backend build-fe-vue
+# Build frontend and backend (default: Vue)
+build: build-backend build-vue
 
-# 编译后端（不嵌入前端）
+# Build backend only
 [working-directory('backend')]
 build-backend:
     pixi run go build -o bin/server ./cmd/server
 
-# ── 嵌入构建（前端 + Go 单二进制）─────────────────
+# ── Embedded Build (Frontend + Go Single Binary) ─
 
-# Vue 版：构建前端 + Go embed 单二进制
+# Build Vue embedded binary
 [working-directory('backend')]
-build-embed-vue: build-fe-vue
+build-embed-vue: build-vue
     pixi run go build -tags embed -ldflags="-s -w" -o bin/server-vue ./cmd/server
 
-# React 版：构建前端 + Go embed 单二进制
+# Build React embedded binary
 [working-directory('backend')]
-build-embed-react: build-fe-react
+build-embed-react: build-react
     pixi run go build -tags embed -ldflags="-s -w" -o bin/server-react ./cmd/server
 
-# ── 运行 embed 二进制 ─────────────────────────────
+# ── Run Embedded Binary ──────────────────────────
 
-# 运行 Vue embed 二进制，可指定端口：just serve-vue port=9000
+# Run Vue embedded binary (optional port: just dev-serve-vue port=9000)
 [working-directory('backend')]
-serve-vue port="8081": build-embed-vue
+dev-serve-vue port="8081": build-embed-vue
     SERVER_PORT={{ port }} ./bin/server-vue
 
-# 运行 React embed 二进制，可指定端口：just serve-react port=9000
+# Run React embedded binary (optional port: just dev-serve-react port=9000)
 [working-directory('backend')]
-serve-react port="8081": build-embed-react
+dev-serve-react port="8081": build-embed-react
     SERVER_PORT={{ port }} ./bin/server-react
 
-# ── 测试 ──────────────────────────────────────────
+# ── Testing ──────────────────────────────────────
 
-# 运行所有测试（默认 Vue）
-test: test-backend test-fe-vue
+# Run all tests (backend + Vue)
+test: test-backend test-vue
 
-# 后端测试
+# Backend tests
+[working-directory('backend')]
 test-backend:
-    pixi run go test ./backend/...
+    pixi run go test ./...
