@@ -101,12 +101,6 @@ dev-react:
 build-react:
     pixi run pnpm run build
 
-# React frontend lint + type check
-[working-directory('frontend-react')]
-test-react:
-    pixi run pnpm run lint
-    pixi run pnpm run build
-
 # Pre-commit check for React frontend (lint + typecheck, no build)
 [working-directory('frontend-react')]
 precommit-react:
@@ -154,19 +148,25 @@ dev-serve-react port=env("EMBED_PORT", "8081"):
 
 # ── Testing ──────────────────────────────────────
 
-# Run all tests (backend + Vue)
-test: test-backend test-vue
+# Run all checks (backend tests + frontend checks)
+check: test-backend check-vue check-react
 
-# Vue frontend lint + type check
-[working-directory('frontend')]
-test-vue:
-    pixi run pnpm run lint:check
-    pixi run pnpm run typecheck
-
-# Backend tests
+# Backend tests (actual unit tests)
 [working-directory('backend')]
 test-backend:
     pixi run go test ./...
+
+# Vue frontend code quality check (lint + typecheck, no actual tests)
+[working-directory('frontend')]
+check-vue:
+    pixi run pnpm run lint:check
+    pixi run pnpm run typecheck
+
+# React frontend code quality check (lint + build, no actual tests)
+[working-directory('frontend-react')]
+check-react:
+    pixi run pnpm run lint
+    pixi run pnpm run build
 
 # Format Go code
 [working-directory('backend')]
