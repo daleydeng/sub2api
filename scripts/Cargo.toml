@@ -1,0 +1,16 @@
+# For rust-analyzer only; the script runs via rust-script.
+[package]
+name = "dbmgr"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "dbmgr"
+path = "dbmgr.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive", "env"] }
+postgres = "0.19"
+redis = "1.0.4"
+which = "8.0.0"

@@ -58,7 +58,6 @@ docker-compose.override.yml
 # IDE / 编辑器
 # ===================
 .idea/
-.vscode/
 *.swp
 *.swo
 *~
@@ -135,8 +134,12 @@ backend/install
 deploy/docker-compose.override.yml
 .gocache/
 vite.config.js
-docs/*
+docs/claude-relay-service/
 .serena/
 .codex/
 frontend/coverage/
 aicodex
+
+# rust-analyzer build artifacts for scripts/
+scripts/target/
+scripts/Cargo.lock
