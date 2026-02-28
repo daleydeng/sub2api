@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useForm } from '@tanstack/react-form'
@@ -19,11 +19,7 @@ export default function ResetPasswordView() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [invalidLink, setInvalidLink] = useState(false)
-
-  useEffect(() => {
-    if (!email || !token) setInvalidLink(true)
-  }, [email, token])
+  const invalidLink = !email || !token
 
   const form = useForm({
     defaultValues: { password: '', confirmPassword: '' },

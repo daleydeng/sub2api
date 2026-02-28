@@ -116,7 +116,7 @@ apiClient.interceptors.response.use(
       const url = String(error.config?.url || '')
 
       // Validate `data` shape to avoid HTML error pages breaking our error handling.
-      const apiData = (typeof data === 'object' && data !== null ? data : {}) as Record<string, any>
+      const apiData = (typeof data === 'object' && data !== null ? data : {}) as Record<string, unknown>
 
       // Ops monitoring disabled: treat as feature-flagged 404, and proactively redirect away
       // from ops pages to avoid broken UI states.
@@ -215,7 +215,7 @@ apiClient.interceptors.response.use(
 
             // Refresh response was not successful, fall through to clear auth
             throw new Error('Token refresh failed')
-          } catch (refreshError) {
+          } catch {
             // Refresh failed - notify subscribers with empty token
             onTokenRefreshed('')
             isRefreshing = false

@@ -44,8 +44,8 @@ export default function AnnouncementBell() {
     try {
       const data = await announcementsAPI.list(false)
       setAnnouncements(data.slice(0, 20))
-    } catch (err: any) {
-      showError(err?.message || t('common.unknownError', 'Unknown error'))
+    } catch (err: unknown) {
+      showError((err as { message?: string })?.message || t('common.unknownError', 'Unknown error'))
     } finally {
       setLoading(false)
     }
@@ -58,8 +58,8 @@ export default function AnnouncementBell() {
       await announcementsAPI.markRead(id)
       setAnnouncements((prev) => prev.map((a) => a.id === id ? { ...a, read_at: new Date().toISOString() } : a))
       setSelectedItem((prev) => prev?.id === id ? { ...prev, read_at: new Date().toISOString() } : prev)
-    } catch (err: any) {
-      showError(err?.message || t('common.unknownError', 'Unknown error'))
+    } catch (err: unknown) {
+      showError((err as { message?: string })?.message || t('common.unknownError', 'Unknown error'))
     }
   }
 
@@ -70,8 +70,8 @@ export default function AnnouncementBell() {
       const now = new Date().toISOString()
       setAnnouncements((prev) => prev.map((a) => a.read_at ? a : { ...a, read_at: now }))
       showSuccess(t('announcements.allMarkedAsRead', 'All marked as read'))
-    } catch (err: any) {
-      showError(err?.message || t('common.unknownError', 'Unknown error'))
+    } catch (err: unknown) {
+      showError((err as { message?: string })?.message || t('common.unknownError', 'Unknown error'))
     } finally {
       setLoading(false)
     }

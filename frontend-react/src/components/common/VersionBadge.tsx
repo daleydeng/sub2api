@@ -41,7 +41,6 @@ export default function VersionBadge({ version }: Props) {
     }
     document.addEventListener('click', handleClickOutside)
     return () => document.removeEventListener('click', handleClickOutside)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (isAdmin) {

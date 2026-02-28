@@ -104,7 +104,7 @@ export default function SubscriptionProgressMini() {
                 </span>
                 {sub.expires_at && (
                   <span className={`text-xs ${daysRemainingClass(sub.expires_at)}`}>
-                    {daysRemainingText(sub.expires_at, t as any)}
+                    {daysRemainingText(sub.expires_at, t as (k: string, d: string, o?: object) => string)}
                   </span>
                 )}
               </div>

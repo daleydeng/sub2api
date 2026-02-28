@@ -146,8 +146,8 @@ export async function getGroupApiKeys(
   id: number,
   page: number = 1,
   pageSize: number = 20
-): Promise<PaginatedResponse<any>> {
-  const { data } = await apiClient.get<PaginatedResponse<any>>(`/admin/groups/${id}/api-keys`, {
+): Promise<PaginatedResponse<Record<string, unknown>>> {
+  const { data } = await apiClient.get<PaginatedResponse<Record<string, unknown>>>(`/admin/groups/${id}/api-keys`, {
     params: { page, page_size: pageSize }
   })
   return data

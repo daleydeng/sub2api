@@ -33,38 +33,41 @@ export default function LinuxDoCallbackView() {
     if (processedRef.current) return
     processedRef.current = true
 
-    const params = parseHashParams()
-    const accessToken = params.access_token
-    const refreshToken = params.refresh_token
-    const expiresIn = params.expires_in
+    async function processCallback() {
+      const params = parseHashParams()
+      const accessToken = params.access_token
+      const refreshToken = params.refresh_token
+      const expiresIn = params.expires_in
 
-    if (!accessToken) {
-      setError(t('linuxdoCallback.noToken', 'No access token received'))
-      return
-    }
+      if (!accessToken) {
+        setError(t('linuxdoCallback.noToken', 'No access token received'))
+        return
+      }
 
-    if (refreshToken) {
-      localStorage.setItem('refresh_token', refreshToken)
-    }
-    if (expiresIn) {
-      const expiresAt = Date.now() + parseInt(expiresIn, 10) * 1000
-      localStorage.setItem('token_expires_at', String(expiresAt))
-    }
+      if (refreshToken) {
+        localStorage.setItem('refresh_token', refreshToken)
+      }
+      if (expiresIn) {
+        const expiresAt = Date.now() + parseInt(expiresIn, 10) * 1000
+        localStorage.setItem('token_expires_at', String(expiresAt))
+      }
 
-    setStatus(t('linuxdoCallback.settingUp', 'Setting up your session...'))
+      setStatus(t('linuxdoCallback.settingUp', 'Setting up your session...'))
 
-    setToken(accessToken)
-      .then(() => {
+      try {
+        await setToken(accessToken)
         const redirect = sessionStorage.getItem('auth_redirect')
         sessionStorage.removeItem('auth_redirect')
         const target = redirect ? sanitizeUrl(redirect) : '/dashboard'
         navigate({ to: target, replace: true })
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error('LinuxDo callback error:', err)
         setError(t('linuxdoCallback.error', 'Failed to complete authentication'))
-      })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+      }
+    }
+
+    processCallback()
+  }, [navigate, setToken, t])
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-dark-950">

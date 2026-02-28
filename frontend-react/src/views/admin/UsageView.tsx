@@ -170,8 +170,9 @@ export default function UsageView() {
       link.click()
       URL.revokeObjectURL(url)
       showSuccess(t('admin.usage.exported', 'Usage data exported'))
-    } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || 'Export failed')
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { detail?: string } }; message?: string }
+      showError(error?.response?.data?.detail || error?.message || 'Export failed')
     } finally {
       setExporting(false)
     }

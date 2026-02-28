@@ -7,7 +7,7 @@
 export interface SelectOption {
   value: string | number | boolean | null
   label: string
-  [key: string]: any // Support extra properties for custom templates
+  [key: string]: unknown // Support extra properties for custom templates
 }
 
 export interface BasePaginationResponse<T> {

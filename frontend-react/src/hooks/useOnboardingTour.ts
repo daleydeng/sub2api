@@ -290,7 +290,7 @@ export function useOnboardingTour(options: OnboardingOptions) {
     })
 
     driverRef.current = driverInstance
-    onboardingStore.getState().setDriverInstance(driverInstance as any)
+    onboardingStore.getState().setDriverInstance(driverInstance as unknown as { isActive?: () => boolean; [key: string]: unknown })
 
     globalKeyboardHandlerRef.current = (e: KeyboardEvent) => {
       if (!driverRef.current?.isActive()) return

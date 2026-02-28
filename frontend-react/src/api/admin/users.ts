@@ -28,7 +28,7 @@ export async function list(
   }
 ): Promise<PaginatedResponse<AdminUser>> {
   // Build params with attribute filters in attr[id]=value format
-  const params: Record<string, any> = {
+  const params: Record<string, unknown> = {
     page,
     page_size: pageSize,
     status: filters?.status,
@@ -145,8 +145,8 @@ export async function toggleStatus(id: number, status: 'active' | 'disabled'): P
  * @param id - User ID
  * @returns List of user's API keys
  */
-export async function getUserApiKeys(id: number): Promise<PaginatedResponse<any>> {
-  const { data } = await apiClient.get<PaginatedResponse<any>>(`/admin/users/${id}/api-keys`)
+export async function getUserApiKeys(id: number): Promise<PaginatedResponse<Record<string, unknown>>> {
+  const { data } = await apiClient.get<PaginatedResponse<Record<string, unknown>>>(`/admin/users/${id}/api-keys`)
   return data
 }
 
@@ -212,7 +212,7 @@ export async function getUserBalanceHistory(
   pageSize: number = 20,
   type?: string
 ): Promise<BalanceHistoryResponse> {
-  const params: Record<string, any> = { page, page_size: pageSize }
+  const params: Record<string, unknown> = { page, page_size: pageSize }
   if (type) params.type = type
   const { data } = await apiClient.get<BalanceHistoryResponse>(
     `/admin/users/${id}/balance-history`,

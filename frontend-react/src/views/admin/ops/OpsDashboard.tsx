@@ -71,7 +71,7 @@ export default function OpsDashboard() {
     try {
       const settings = await adminAPI.settings.getSettings()
       setOpsEnabled(settings.ops_monitoring_enabled ?? false)
-    } catch (err: any) {
+    } catch {
       showError(t('admin.ops.loadFailed', 'Failed to load settings'))
     } finally {
       setLoading(false)
@@ -94,8 +94,9 @@ export default function OpsDashboard() {
           ? t('admin.ops.enabled', 'Ops monitoring enabled')
           : t('admin.ops.disabled', 'Ops monitoring disabled')
       )
-    } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || 'Failed to update settings')
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { detail?: string } }; message?: string }
+      showError(error?.response?.data?.detail || error?.message || 'Failed to update settings')
     } finally {
       setToggling(false)
     }

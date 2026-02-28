@@ -127,8 +127,8 @@ export const useAuthStore = create<AuthState & AuthActions>()((set, get) => {
   }
 
   function setAuthFromResponse(response: AuthResponse): void {
-    const runMode = response.user.run_mode || 'standard'
-    const { run_mode: _rm, ...userData } = response.user
+    const { run_mode, ...userData } = response.user
+    const runMode = run_mode || 'standard'
 
     set({
       token: response.access_token,
@@ -281,8 +281,8 @@ export const useAuthStore = create<AuthState & AuthActions>()((set, get) => {
 
       try {
         const response = await authAPI.getCurrentUser()
-        const newRunMode = response.data.run_mode || runMode
-        const { run_mode: _rm, ...userData } = response.data
+        const { run_mode, ...userData } = response.data
+        const newRunMode = run_mode || runMode
 
         set({
           user: userData,
