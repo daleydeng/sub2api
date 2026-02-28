@@ -202,6 +202,29 @@ frontend-react/    - React（我们的主前端）— 自定义功能在此开�
 - 通过 Go build tags 选择内嵌哪个前端：`-tags embed`（Vue）或 `-tags "embed react"`（React）
 - embed 声明分别在 `embed_fs_vue.go` 和 `embed_fs_react.go` 中
 
+### Frontend React vs Vue Intentional Differences
+
+React 版本 (`frontend-react/`) 与 Vue 版本 (`frontend/`) 在以下方面存在**有意的**差异。这些差异是为了优化 React 版本的开发体验和用户体验而做的剪裁，应当保留：
+
+#### 已移除的功能
+
+**SettingsView (Admin Settings Page):**
+- ❌ SMTP 连接测试按钮 (`testSmtpConnection`)
+- ❌ 发送测试邮件功能 (`sendTestEmail`)
+- **理由：** 简化管理界面 UX，SMTP 配置可通过实际发送验证邮件来测试
+
+#### 不同的实现方式
+
+*(待添加其他有意差异)*
+
+#### 保持一致的部分
+
+- ✅ 两个版本共享相同的后端 API
+- ✅ 布局和视觉设计保持一致
+- ✅ 功能完整性保持对等（除非上述明确标注为移除）
+
+**注意：** 在迁移或对齐功能时，请检查本章节以避免重新引入已剪裁的功能。
+
 ### 网关核心 (`internal/gateway/`)
 
 网关处理：
