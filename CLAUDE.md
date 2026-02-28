@@ -128,8 +128,8 @@ go generate ./cmd/server   # 重新生成 Wire DI 代码（wire_gen.go）
 
 **两个前端（部署时选择其一）：**
 
-- `frontend/` — 上游项目（Wei-Shaw/sub2api）的 Vue 3 实现，功能完善。保留此目录以便合并上游更新，一般不在此目录做自定义开发。
-- `frontend-react/` — 我们对 Vue 实现的 React 复刻，也是自定义功能的开发目标。**日常开发应在此目录进行。**
+- `frontend/` — 原项目（Wei-Shaw/sub2api）的 Vue 3 实现，功能完善。保留此目录以便从上上游合并更新，一般不在此目录做自定义开发。
+- `frontend-react/` — 我们对 Vue 实现的 React 复刻，也是自定义功能的开发目标。**日常开发应在此目录进行。frontend-react 开发在 VIDLG/sub2api（upstream）进行。**
 
 **React 前端与 Vue 前端的关系：**
 - 整体 UI 布局和功能与 Vue 的 `frontend/` 保持一致（功能对齐）
@@ -373,14 +373,30 @@ ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=pass123 ./server
 
 ## Git 工作流
 
-```bash
-# 远程仓库
-origin      - 你的 fork
-upstream    - Wei-Shaw/sub2api（主上游）
+**仓库关系：**
 
-# 与上游同步
+- **Wei-Shaw/sub2api** — 原项目（仅 Vue，无 React）
+- **VIDLG/sub2api** (upstream) — 开发 React 前端的主仓库，接收 frontend-react 相关的 PR
+- **daleydeng/sub2api** (origin) — 你的 fork
+
+```bash
+# 远程仓库配置
+origin      - daleydeng/sub2api（你的 fork）
+upstream    - VIDLG/sub2api（React 前端开发的主仓库）
+
+# 提交 PR 到 upstream
+just pr-upstream "PR title" "PR description"
+# 或手动
+gh pr create --repo VIDLG/sub2api --base main --head daleydeng:main --title "..." --body "..." --web
+
+# 与 upstream 同步
 git fetch upstream
 git merge upstream/main
+
+# 同步上上游（Wei-Shaw/sub2api）的 Vue 更新（可选，当需要 Vue 前端的上游更新时）
+git remote add origin-upstream https://github.com/Wei-Shaw/sub2api.git
+git fetch origin-upstream
+git merge origin-upstream/main
 ```
 
 ## 文档
