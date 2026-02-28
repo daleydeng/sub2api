@@ -104,7 +104,7 @@ export default function SettingsView() {
       setApiKeyStatus(keyData)
       setStreamTimeout(stData)
     } catch (err: any) {
-      showError(t('admin.settings.loadFailed', 'Failed to load settings'))
+      showError(t('admin.settings.failedToLoad', 'Failed to load settings'))
     } finally {
       setLoading(false)
     }
@@ -164,9 +164,9 @@ export default function SettingsView() {
       setSmtpPassword('')
       setTurnstileSecretKey('')
       setLinuxdoClientSecret('')
-      showSuccess(t('admin.settings.saved', 'Settings saved'))
+      showSuccess(t('admin.settings.settingsSaved', 'Settings saved successfully'))
     } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || 'Failed to save settings')
+      showError(err?.response?.data?.detail || err?.message || t('admin.settings.failedToSave', 'Failed to save settings'))
     } finally {
       setSaving(false)
     }
@@ -182,7 +182,7 @@ export default function SettingsView() {
       setShowApiKey(true)
       const keyData = await adminAPI.settings.getAdminApiKey()
       setApiKeyStatus(keyData)
-      showSuccess(t('admin.settings.apiKeyRegenerated', 'API key regenerated'))
+      showSuccess(t('admin.settings.adminApiKey.keyGenerated', 'New admin API key generated'))
     } catch (err: any) {
       showError(err?.response?.data?.detail || err?.message || 'Failed to regenerate API key')
     } finally {
@@ -196,7 +196,7 @@ export default function SettingsView() {
       await adminAPI.settings.deleteAdminApiKey()
       setApiKeyStatus({ exists: false, masked_key: '' })
       setNewApiKey(null)
-      showSuccess(t('admin.settings.apiKeyDeleted', 'API key deleted'))
+      showSuccess(t('admin.settings.adminApiKey.keyDeleted', 'Admin API key deleted'))
     } catch (err: any) {
       showError(err?.response?.data?.detail || err?.message || 'Failed to delete API key')
     } finally {
@@ -224,9 +224,9 @@ export default function SettingsView() {
         smtp_password: smtpPassword || 'CONFIGURED',
         smtp_use_tls: settings.smtp_use_tls,
       })
-      showSuccess(t('admin.settings.smtpTestSuccess', 'SMTP connection successful'))
+      showSuccess(t('admin.settings.smtpConnectionSuccess', 'SMTP connection successful'))
     } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || 'SMTP test failed')
+      showError(err?.response?.data?.detail || err?.message || t('admin.settings.failedToTestSmtp', 'SMTP connection test failed'))
     } finally {
       setTestingSmtp(false)
     }
@@ -246,9 +246,9 @@ export default function SettingsView() {
         smtp_from_name: settings.smtp_from_name,
         smtp_use_tls: settings.smtp_use_tls,
       })
-      showSuccess(t('admin.settings.testEmailSent', 'Test email sent'))
+      showSuccess(t('admin.settings.testEmailSent', 'Test email sent successfully'))
     } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || 'Failed to send test email')
+      showError(err?.response?.data?.detail || err?.message || t('admin.settings.failedToSendTestEmail', 'Failed to send test email'))
     } finally {
       setSendingTestEmail(false)
     }
@@ -261,9 +261,9 @@ export default function SettingsView() {
     try {
       const updated = await adminAPI.settings.updateStreamTimeoutSettings(streamTimeout)
       setStreamTimeout(updated)
-      showSuccess(t('admin.settings.streamTimeoutSaved', 'Stream timeout settings saved'))
+      showSuccess(t('admin.settings.streamTimeout.saved', 'Stream timeout settings saved'))
     } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || 'Failed to save stream timeout')
+      showError(err?.response?.data?.detail || err?.message || t('admin.settings.streamTimeout.saveFailed', 'Failed to save stream timeout settings'))
     }
   }
 
@@ -293,14 +293,14 @@ export default function SettingsView() {
       </div>
 
       {/* Admin API Key */}
-      <SectionCard title={t('admin.settings.adminApiKey', 'Admin API Key')} description={t('admin.settings.adminApiKeyDesc', 'Manage the admin API key for external integrations')}>
+      <SectionCard title={t('admin.settings.adminApiKey.title', 'Admin API Key')} description={t('admin.settings.adminApiKey.description', 'Global API key for external system integration with full admin access')}>
         <div className="flex items-center gap-3">
           {apiKeyStatus?.exists ? (
             <>
               <code className="code flex-1 truncate">{apiKeyStatus.masked_key}</code>
               <Button variant="secondary" size="sm" onClick={handleRegenerateApiKey} disabled={apiKeyLoading}>
                 <RefreshIcon className="h-4 w-4" />
-                {t('admin.settings.regenerate', 'Regenerate')}
+                {t('admin.settings.adminApiKey.regenerate', 'Regenerate')}
               </Button>
               <Button variant="destructive" size="sm" onClick={handleDeleteApiKey} disabled={apiKeyLoading}>
                 <TrashIcon className="h-4 w-4" />
@@ -309,9 +309,9 @@ export default function SettingsView() {
             </>
           ) : (
             <>
-              <span className="text-sm text-gray-500">{t('admin.settings.noApiKey', 'No API key configured')}</span>
+              <span className="text-sm text-gray-500">{t('admin.settings.adminApiKey.notConfigured', 'Admin API key not configured')}</span>
               <Button size="sm" onClick={handleRegenerateApiKey} disabled={apiKeyLoading}>
-                {apiKeyLoading ? <span className="spinner h-4 w-4" /> : t('admin.settings.generate', 'Generate')}
+                {apiKeyLoading ? <span className="spinner h-4 w-4" /> : t('admin.settings.adminApiKey.create', 'Create Key')}
               </Button>
             </>
           )}
@@ -319,7 +319,7 @@ export default function SettingsView() {
         {newApiKey && (
           <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
             <p className="mb-2 text-xs font-medium text-amber-800 dark:text-amber-200">
-              {t('admin.settings.apiKeyWarning', 'Save this key now. It will not be shown again.')}
+              {t('admin.settings.adminApiKey.keyWarning', 'This key will only be shown once. Please copy it now.')}
             </p>
             <div className="flex items-center gap-2">
               <code className="code flex-1 text-xs break-all">
@@ -337,15 +337,15 @@ export default function SettingsView() {
       </SectionCard>
 
       {/* Registration */}
-      <SectionCard title={t('admin.settings.registration', 'Registration')} description={t('admin.settings.registrationDesc', 'Control user registration and verification')}>
+      <SectionCard title={t('admin.settings.registration.title', 'Registration Settings')} description={t('admin.settings.registration.description', 'Control user registration and verification')}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {([
-            ['registration_enabled', t('admin.settings.registrationEnabled', 'Registration Enabled')],
-            ['email_verify_enabled', t('admin.settings.emailVerify', 'Email Verification')],
-            ['promo_code_enabled', t('admin.settings.promoCode', 'Promo Code')],
-            ['invitation_code_enabled', t('admin.settings.invitationCode', 'Invitation Code')],
-            ['totp_enabled', t('admin.settings.totp', 'TOTP 2FA')],
-            ['onboarding_enabled', t('admin.settings.onboarding', 'Onboarding Tour')],
+            ['registration_enabled', t('admin.settings.registration.enableRegistration', 'Registration Enabled')],
+            ['email_verify_enabled', t('admin.settings.registration.emailVerification', 'Email Verification')],
+            ['promo_code_enabled', t('admin.settings.registration.promoCode', 'Promo Code')],
+            ['invitation_code_enabled', t('admin.settings.registration.invitationCode', 'Invitation Code Registration')],
+            ['totp_enabled', t('admin.settings.registration.totp', 'Two-Factor Authentication (2FA)')],
+            ['onboarding_enabled', t('admin.settings.registration.onboardingTour', 'Onboarding Tour')],
           ] as [keyof SystemSettings, string][]).map(([key, label]) => (
             <div key={key} className="flex items-center justify-between">
               <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
@@ -356,10 +356,10 @@ export default function SettingsView() {
       </SectionCard>
 
       {/* Default Settings */}
-      <SectionCard title={t('admin.settings.defaults', 'Default Settings')} description={t('admin.settings.defaultsDesc', 'Default values for new users')}>
+      <SectionCard title={t('admin.settings.defaults.title', 'Default User Settings')} description={t('admin.settings.defaults.description', 'Default values for new users')}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="input-label">{t('admin.settings.defaultBalance', 'Default Balance')}</label>
+            <label className="input-label">{t('admin.settings.defaults.defaultBalance', 'Default Balance')}</label>
             <input
               type="number"
               className="input"
@@ -369,7 +369,7 @@ export default function SettingsView() {
             />
           </div>
           <div>
-            <label className="input-label">{t('admin.settings.defaultConcurrency', 'Default Concurrency')}</label>
+            <label className="input-label">{t('admin.settings.defaults.defaultConcurrency', 'Default Concurrency')}</label>
             <input
               type="number"
               className="input"
@@ -382,10 +382,10 @@ export default function SettingsView() {
       </SectionCard>
 
       {/* Site Settings */}
-      <SectionCard title={t('admin.settings.site', 'Site Settings')} description={t('admin.settings.siteDesc', 'Customize the site appearance and content')}>
+      <SectionCard title={t('admin.settings.site.title', 'Site Settings')} description={t('admin.settings.site.description', 'Customize site branding')}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="input-label">{t('admin.settings.siteName', 'Site Name')}</label>
+            <label className="input-label">{t('admin.settings.site.siteName', 'Site Name')}</label>
             <input
               type="text"
               className="input"
@@ -394,7 +394,7 @@ export default function SettingsView() {
             />
           </div>
           <div>
-            <label className="input-label">{t('admin.settings.siteSubtitle', 'Site Subtitle')}</label>
+            <label className="input-label">{t('admin.settings.site.siteSubtitle', 'Site Subtitle')}</label>
             <input
               type="text"
               className="input"
@@ -403,7 +403,7 @@ export default function SettingsView() {
             />
           </div>
           <div>
-            <label className="input-label">{t('admin.settings.apiBaseUrl', 'API Base URL')}</label>
+            <label className="input-label">{t('admin.settings.site.apiBaseUrl', 'API Base URL')}</label>
             <input
               type="text"
               className="input"
@@ -413,7 +413,7 @@ export default function SettingsView() {
             />
           </div>
           <div>
-            <label className="input-label">{t('admin.settings.contactInfo', 'Contact Info')}</label>
+            <label className="input-label">{t('admin.settings.site.contactInfo', 'Contact Info')}</label>
             <input
               type="text"
               className="input"
@@ -422,7 +422,7 @@ export default function SettingsView() {
             />
           </div>
           <div>
-            <label className="input-label">{t('admin.settings.docUrl', 'Documentation URL')}</label>
+            <label className="input-label">{t('admin.settings.site.docUrl', 'Documentation URL')}</label>
             <input
               type="text"
               className="input"
@@ -433,7 +433,7 @@ export default function SettingsView() {
           </div>
         </div>
         <div>
-          <label className="input-label">{t('admin.settings.homeContent', 'Home Content (HTML/Markdown)')}</label>
+          <label className="input-label">{t('admin.settings.site.homeContent', 'Home Page Content')}</label>
           <textarea
             className="input font-mono text-xs"
             rows={4}
@@ -445,10 +445,10 @@ export default function SettingsView() {
 
       {/* SMTP Settings (shown when email_verify is enabled) */}
       {settings.email_verify_enabled && (
-        <SectionCard title={t('admin.settings.smtp', 'SMTP Settings')} description={t('admin.settings.smtpDesc', 'Email delivery configuration')}>
+        <SectionCard title={t('admin.settings.smtp.title', 'SMTP Settings')} description={t('admin.settings.smtp.description', 'Configure email sending for verification codes')}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="input-label">{t('admin.settings.smtpHost', 'SMTP Host')}</label>
+              <label className="input-label">{t('admin.settings.smtp.host', 'SMTP Host')}</label>
               <input
                 type="text"
                 className="input"
@@ -458,7 +458,7 @@ export default function SettingsView() {
               />
             </div>
             <div>
-              <label className="input-label">{t('admin.settings.smtpPort', 'SMTP Port')}</label>
+              <label className="input-label">{t('admin.settings.smtp.port', 'SMTP Port')}</label>
               <input
                 type="number"
                 className="input"
@@ -467,7 +467,7 @@ export default function SettingsView() {
               />
             </div>
             <div>
-              <label className="input-label">{t('admin.settings.smtpUsername', 'SMTP Username')}</label>
+              <label className="input-label">{t('admin.settings.smtp.username', 'SMTP Username')}</label>
               <input
                 type="text"
                 className="input"
@@ -477,9 +477,9 @@ export default function SettingsView() {
             </div>
             <div>
               <label className="input-label">
-                {t('admin.settings.smtpPassword', 'SMTP Password')}
+                {t('admin.settings.smtp.password', 'SMTP Password')}
                 {settings.smtp_password_configured && (
-                  <span className="ml-2 text-xs text-emerald-600">{t('admin.settings.configured', '(configured)')}</span>
+                  <span className="ml-2 text-xs text-emerald-600">{t('admin.settings.smtp.passwordConfiguredHint', 'Password configured')}</span>
                 )}
               </label>
               <input
@@ -487,11 +487,11 @@ export default function SettingsView() {
                 className="input"
                 value={smtpPassword}
                 onChange={(e) => setSmtpPassword(e.target.value)}
-                placeholder={settings.smtp_password_configured ? t('admin.settings.leaveBlank', 'Leave blank to keep unchanged') : ''}
+                placeholder={settings.smtp_password_configured ? t('admin.settings.smtp.passwordHint', 'Leave empty to keep existing password') : ''}
               />
             </div>
             <div>
-              <label className="input-label">{t('admin.settings.smtpFromEmail', 'From Email')}</label>
+              <label className="input-label">{t('admin.settings.smtp.fromEmail', 'From Email')}</label>
               <input
                 type="email"
                 className="input"
@@ -500,7 +500,7 @@ export default function SettingsView() {
               />
             </div>
             <div>
-              <label className="input-label">{t('admin.settings.smtpFromName', 'From Name')}</label>
+              <label className="input-label">{t('admin.settings.smtp.fromName', 'From Name')}</label>
               <input
                 type="text"
                 className="input"
@@ -511,12 +511,12 @@ export default function SettingsView() {
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.useTls', 'Use TLS')}</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.smtp.useTls', 'Use TLS')}</span>
               <Toggle value={settings.smtp_use_tls} onChange={(v) => updateField('smtp_use_tls', v)} />
             </div>
             <div className="flex items-center gap-2">
               <Button variant="secondary" size="sm" onClick={handleTestSmtp} disabled={testingSmtp}>
-                {testingSmtp ? <span className="spinner h-3 w-3" /> : t('admin.settings.testConnection', 'Test Connection')}
+                {testingSmtp ? <span className="spinner h-3 w-3" /> : t('admin.settings.smtp.testConnection', 'Test Connection')}
               </Button>
             </div>
           </div>
@@ -526,7 +526,7 @@ export default function SettingsView() {
               className="input flex-1"
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
-              placeholder={t('admin.settings.testEmailPlaceholder', 'Enter email address for test')}
+              placeholder={t('admin.settings.testEmail.recipientEmailPlaceholder', 'Enter email address for test')}
             />
             <Button
               variant="secondary"
@@ -534,22 +534,22 @@ export default function SettingsView() {
               onClick={handleSendTestEmail}
               disabled={sendingTestEmail || !testEmail}
             >
-              {sendingTestEmail ? <span className="spinner h-3 w-3" /> : t('admin.settings.sendTestEmail', 'Send Test Email')}
+              {sendingTestEmail ? <span className="spinner h-3 w-3" /> : t('admin.settings.testEmail.sendTestEmail', 'Send Test Email')}
             </Button>
           </div>
         </SectionCard>
       )}
 
       {/* Cloudflare Turnstile */}
-      <SectionCard title={t('admin.settings.turnstile', 'Cloudflare Turnstile')} description={t('admin.settings.turnstileDesc', 'Bot protection for registration and login')}>
+      <SectionCard title={t('admin.settings.turnstile.title', 'Cloudflare Turnstile')} description={t('admin.settings.turnstile.description', 'Bot protection for login and registration')}>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.turnstileEnabled', 'Enable Turnstile')}</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.turnstile.enableTurnstile', 'Enable Turnstile')}</span>
           <Toggle value={settings.turnstile_enabled} onChange={(v) => updateField('turnstile_enabled', v)} />
         </div>
         {settings.turnstile_enabled && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="input-label">{t('admin.settings.turnstileSiteKey', 'Site Key')}</label>
+              <label className="input-label">{t('admin.settings.turnstile.siteKey', 'Site Key')}</label>
               <input
                 type="text"
                 className="input"
@@ -559,9 +559,9 @@ export default function SettingsView() {
             </div>
             <div>
               <label className="input-label">
-                {t('admin.settings.turnstileSecretKey', 'Secret Key')}
+                {t('admin.settings.turnstile.secretKey', 'Secret Key')}
                 {settings.turnstile_secret_key_configured && (
-                  <span className="ml-2 text-xs text-emerald-600">{t('admin.settings.configured', '(configured)')}</span>
+                  <span className="ml-2 text-xs text-emerald-600">{t('admin.settings.turnstile.secretKeyConfiguredHint', 'Secret key configured')}</span>
                 )}
               </label>
               <input
@@ -569,7 +569,7 @@ export default function SettingsView() {
                 className="input"
                 value={turnstileSecretKey}
                 onChange={(e) => setTurnstileSecretKey(e.target.value)}
-                placeholder={settings.turnstile_secret_key_configured ? t('admin.settings.leaveBlank', 'Leave blank to keep unchanged') : ''}
+                placeholder={settings.turnstile_secret_key_configured ? t('admin.settings.turnstile.secretKeyHint', 'Leave empty to keep the current value') : ''}
               />
             </div>
           </div>
@@ -577,15 +577,15 @@ export default function SettingsView() {
       </SectionCard>
 
       {/* LinuxDo OAuth */}
-      <SectionCard title={t('admin.settings.linuxdo', 'LinuxDo OAuth')} description={t('admin.settings.linuxdoDesc', 'LinuxDo Connect OAuth integration')}>
+      <SectionCard title={t('admin.settings.linuxdo.title', 'LinuxDo Connect Login')} description={t('admin.settings.linuxdo.description', 'Configure LinuxDo Connect OAuth for Sub2API end-user login')}>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.linuxdoEnabled', 'Enable LinuxDo OAuth')}</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.linuxdo.enable', 'Enable LinuxDo Login')}</span>
           <Toggle value={settings.linuxdo_connect_enabled} onChange={(v) => updateField('linuxdo_connect_enabled', v)} />
         </div>
         {settings.linuxdo_connect_enabled && (
           <div className="space-y-4">
             <div>
-              <label className="input-label">{t('admin.settings.linuxdoClientId', 'Client ID')}</label>
+              <label className="input-label">{t('admin.settings.linuxdo.clientId', 'Client ID')}</label>
               <input
                 type="text"
                 className="input"
@@ -595,9 +595,9 @@ export default function SettingsView() {
             </div>
             <div>
               <label className="input-label">
-                {t('admin.settings.linuxdoClientSecret', 'Client Secret')}
+                {t('admin.settings.linuxdo.clientSecret', 'Client Secret')}
                 {settings.linuxdo_connect_client_secret_configured && (
-                  <span className="ml-2 text-xs text-emerald-600">{t('admin.settings.configured', '(configured)')}</span>
+                  <span className="ml-2 text-xs text-emerald-600">{t('admin.settings.linuxdo.clientSecretConfiguredHint', 'Secret configured')}</span>
                 )}
               </label>
               <input
@@ -605,11 +605,11 @@ export default function SettingsView() {
                 className="input"
                 value={linuxdoClientSecret}
                 onChange={(e) => setLinuxdoClientSecret(e.target.value)}
-                placeholder={settings.linuxdo_connect_client_secret_configured ? t('admin.settings.leaveBlank', 'Leave blank to keep unchanged') : ''}
+                placeholder={settings.linuxdo_connect_client_secret_configured ? t('admin.settings.linuxdo.clientSecretHint', 'Leave empty to keep the current value') : ''}
               />
             </div>
             <div>
-              <label className="input-label">{t('admin.settings.linuxdoRedirectUrl', 'Redirect URL')}</label>
+              <label className="input-label">{t('admin.settings.linuxdo.redirectUrl', 'Redirect URL')}</label>
               <input
                 type="text"
                 className="input"
@@ -623,14 +623,14 @@ export default function SettingsView() {
       </SectionCard>
 
       {/* Purchase */}
-      <SectionCard title={t('admin.settings.purchase', 'Purchase Subscription')} description={t('admin.settings.purchaseDesc', 'External purchase link configuration')}>
+      <SectionCard title={t('admin.settings.purchase.title', 'Purchase Page')} description={t('admin.settings.purchase.description', 'Show a "Purchase Subscription" entry in the sidebar and open the configured URL in an iframe')}>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.purchaseEnabled', 'Enable Purchase')}</span>
+          <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.purchase.enabled', 'Show Purchase Entry')}</span>
           <Toggle value={settings.purchase_subscription_enabled} onChange={(v) => updateField('purchase_subscription_enabled', v)} />
         </div>
         {settings.purchase_subscription_enabled && (
           <div>
-            <label className="input-label">{t('admin.settings.purchaseUrl', 'Purchase URL')}</label>
+            <label className="input-label">{t('admin.settings.purchase.url', 'Purchase URL')}</label>
             <input
               type="text"
               className="input"
@@ -643,11 +643,11 @@ export default function SettingsView() {
       </SectionCard>
 
       {/* Stream Timeout */}
-      <SectionCard title={t('admin.settings.streamTimeout', 'Stream Timeout')} description={t('admin.settings.streamTimeoutDesc', 'Configure stream timeout detection and action')}>
+      <SectionCard title={t('admin.settings.streamTimeout.title', 'Stream Timeout Handling')} description={t('admin.settings.streamTimeout.description', 'Configure account handling strategy when upstream response times out')}>
         {streamTimeout && (
           <>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.streamTimeoutEnabled', 'Enable Stream Timeout Detection')}</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.streamTimeout.enabled', 'Enable Stream Timeout Handling')}</span>
               <Toggle
                 value={streamTimeout.enabled}
                 onChange={(v) => setStreamTimeout((prev) => prev ? { ...prev, enabled: v } : prev)}
@@ -656,7 +656,7 @@ export default function SettingsView() {
             {streamTimeout.enabled && (
               <div className="space-y-4">
                 <div>
-                  <label className="input-label">{t('admin.settings.streamTimeoutAction', 'Action')}</label>
+                  <label className="input-label">{t('admin.settings.streamTimeout.action', 'Action')}</label>
                   <Select
                     value={streamTimeout.action}
                     onValueChange={(v) => setStreamTimeout((prev) => prev ? { ...prev, action: v as StreamTimeoutSettings['action'] } : prev)}
@@ -665,15 +665,15 @@ export default function SettingsView() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="temp_unsched">Temporary Unschedule</SelectItem>
-                      <SelectItem value="error">Mark as Error</SelectItem>
-                      <SelectItem value="none">None (Log Only)</SelectItem>
+                      <SelectItem value="temp_unsched">{t('admin.settings.streamTimeout.actionTempUnsched', 'Temporarily Unschedulable')}</SelectItem>
+                      <SelectItem value="error">{t('admin.settings.streamTimeout.actionError', 'Mark as Error')}</SelectItem>
+                      <SelectItem value="none">{t('admin.settings.streamTimeout.actionNone', 'No Action')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <div>
-                    <label className="input-label">{t('admin.settings.thresholdCount', 'Threshold Count')}</label>
+                    <label className="input-label">{t('admin.settings.streamTimeout.thresholdCount', 'Trigger Threshold (count)')}</label>
                     <input
                       type="number"
                       className="input"
@@ -683,7 +683,7 @@ export default function SettingsView() {
                     />
                   </div>
                   <div>
-                    <label className="input-label">{t('admin.settings.thresholdWindow', 'Window (min)')}</label>
+                    <label className="input-label">{t('admin.settings.streamTimeout.thresholdWindowMinutes', 'Threshold Window (minutes)')}</label>
                     <input
                       type="number"
                       className="input"
@@ -694,7 +694,7 @@ export default function SettingsView() {
                   </div>
                   {streamTimeout.action === 'temp_unsched' && (
                     <div>
-                      <label className="input-label">{t('admin.settings.unschedMinutes', 'Unsched (min)')}</label>
+                      <label className="input-label">{t('admin.settings.streamTimeout.tempUnschedMinutes', 'Pause Duration (minutes)')}</label>
                       <input
                         type="number"
                         className="input"
@@ -708,7 +708,7 @@ export default function SettingsView() {
                 <div className="flex justify-end">
                   <Button variant="secondary" size="sm" onClick={handleSaveStreamTimeout}>
                     <CheckIcon className="h-4 w-4" />
-                    {t('admin.settings.saveStreamTimeout', 'Save Stream Timeout')}
+                    {t('admin.settings.saveSettings', 'Save Settings')}
                   </Button>
                 </div>
               </div>
@@ -725,7 +725,7 @@ export default function SettingsView() {
           ) : (
             <CheckIcon className="h-5 w-5" />
           )}
-          {t('admin.settings.saveAll', 'Save All Settings')}
+          {t('admin.settings.saveSettings', 'Save Settings')}
         </Button>
       </div>
     </div>
