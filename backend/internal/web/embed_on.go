@@ -5,7 +5,6 @@ package web
 import (
 	"bytes"
 	"context"
-	"embed"
 	"encoding/json"
 	"io"
 	"io/fs"
@@ -17,13 +16,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// frontendFS and embedSubDir are defined in embed_fs_vue.go or embed_fs_react.go
+// depending on build tags: -tags embed (Vue) or -tags "embed react" (React)
+
 const (
 	// NonceHTMLPlaceholder is the placeholder for nonce in HTML script tags
 	NonceHTMLPlaceholder = "__CSP_NONCE_VALUE__"
 )
-
-//go:embed all:dist
-var frontendFS embed.FS
 
 // PublicSettingsProvider is an interface to fetch public settings
 type PublicSettingsProvider interface {
@@ -41,7 +40,7 @@ type FrontendServer struct {
 
 // NewFrontendServer creates a new frontend server with settings injection
 func NewFrontendServer(settingsProvider PublicSettingsProvider) (*FrontendServer, error) {
-	distFS, err := fs.Sub(frontendFS, "dist")
+	distFS, err := fs.Sub(frontendFS, embedSubDir)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +197,7 @@ func replaceNoncePlaceholder(html []byte, nonce string) []byte {
 // ServeEmbeddedFrontend returns a middleware for serving embedded frontend
 // This is the legacy function for backward compatibility when no settings provider is available
 func ServeEmbeddedFrontend() gin.HandlerFunc {
-	distFS, err := fs.Sub(frontendFS, "dist")
+	distFS, err := fs.Sub(frontendFS, embedSubDir)
 	if err != nil {
 		panic("failed to get dist subdirectory: " + err.Error())
 	}
@@ -256,6 +255,6 @@ func serveIndexHTML(c *gin.Context, fsys fs.FS) {
 }
 
 func HasEmbeddedFrontend() bool {
-	_, err := frontendFS.ReadFile("dist/index.html")
+	_, err := frontendFS.ReadFile(embedSubDir + "/index.html")
 	return err == nil
 }

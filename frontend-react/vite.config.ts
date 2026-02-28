@@ -63,7 +63,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      outDir: '../backend/internal/web/dist',
+      outDir: '../backend/internal/web/dist-react',
       emptyOutDir: true,
       rollupOptions: {
         output: {

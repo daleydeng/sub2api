@@ -93,12 +93,10 @@ build/
 release/
 
 # 后端嵌入的前端构建产物
-# Keep a placeholder file so `//go:embed all:dist` always has a match in CI/lint,
-# while still ignoring generated frontend build outputs.
+# Vue: dist-vue/ (build tag: embed), React: dist-react/ (build tag: embed react)
 backend/internal/web/dist/
-!backend/internal/web/dist/
-backend/internal/web/dist/*
-!backend/internal/web/dist/.keep
+backend/internal/web/dist-vue/
+backend/internal/web/dist-react/
 
 # 后端运行时缓存数据
 backend/data/
@@ -121,9 +119,8 @@ backend/.installed
 # 其他
 # ===================
 tests
-CLAUDE.md
 AGENTS.md
-.claude
+.claude/settings.local.json
 .code-review-state
 openspec/
 code-reviews/

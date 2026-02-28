@@ -19,6 +19,12 @@ export REDIS_DIR := root / ".dev-data" / "redis"
 default:
     @just --list
 
+# ── Setup ─────────────────────────────────────
+
+# Install all project dependencies (pixi + frontend)
+setup:
+    pixi install
+
 # ── Development Database ────────────────────────
 
 # Initialize PostgreSQL data directory (first time only)
@@ -78,12 +84,6 @@ dev-vue:
 build-vue:
     pixi run pnpm run build
 
-# Vue frontend lint + type check
-[working-directory('frontend')]
-test-vue:
-    pixi run pnpm run lint:check
-    pixi run pnpm run typecheck
-
 # ── Frontend (React) ────────────────────────────
 
 # Install React frontend dependencies
@@ -96,7 +96,7 @@ dev-install-react:
 dev-react:
     pixi run pnpm run dev
 
-# Build React frontend (output to backend/internal/web/dist/)
+# Build React frontend (output to backend/internal/web/dist-react/)
 [working-directory('frontend-react')]
 build-react:
     pixi run pnpm run build
@@ -119,32 +119,38 @@ build-backend:
 
 # ── Embedded Build (Frontend + Go Single Binary) ─
 
-# Build Vue embedded binary
+# Build Vue embedded binary (default: -tags embed)
 [working-directory('backend')]
 build-embed-vue: build-vue
     pixi run go build -tags embed -ldflags="-s -w" -o bin/server-vue ./cmd/server
 
-# Build React embedded binary
+# Build React embedded binary (-tags "embed react")
 [working-directory('backend')]
 build-embed-react: build-react
-    pixi run go build -tags embed -ldflags="-s -w" -o bin/server-react ./cmd/server
+    pixi run go build -tags "embed react" -ldflags="-s -w" -o bin/server-react ./cmd/server
 
 # ── Run Embedded Binary ──────────────────────────
 
-# Run Vue embedded binary (optional port: just dev-serve-vue port=9000)
+# Run Vue embedded binary (build first with: just build-embed-vue)
 [working-directory('backend')]
-dev-serve-vue port="8081": build-embed-vue
+dev-serve-vue port=env("EMBED_PORT", "8081"):
     SERVER_PORT={{ port }} ./bin/server-vue
 
-# Run React embedded binary (optional port: just dev-serve-react port=9000)
+# Run React embedded binary (build first with: just build-embed-react)
 [working-directory('backend')]
-dev-serve-react port="8081": build-embed-react
+dev-serve-react port=env("EMBED_PORT", "8081"):
     SERVER_PORT={{ port }} ./bin/server-react
 
 # ── Testing ──────────────────────────────────────
 
 # Run all tests (backend + Vue)
 test: test-backend test-vue
+
+# Vue frontend lint + type check
+[working-directory('frontend')]
+test-vue:
+    pixi run pnpm run lint:check
+    pixi run pnpm run typecheck
 
 # Backend tests
 [working-directory('backend')]
