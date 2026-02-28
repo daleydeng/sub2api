@@ -1,0 +1,6 @@
+{
+  // rust-analyzer needs a Cargo.toml to resolve dependencies for rust-script files
+  "rust-analyzer.linkedProjects": [
+    "scripts/Cargo.toml"
+  ]
+}
