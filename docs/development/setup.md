@@ -12,7 +12,7 @@ We provide setup scripts that automatically install all required development too
 
 ```powershell
 # Run in PowerShell
-.\setup.ps1
+.\scripts\setup\setup.ps1
 ```
 
 The script will install via [Scoop](https://scoop.sh/):
@@ -29,7 +29,7 @@ The script will install via [Scoop](https://scoop.sh/):
 
 ```bash
 # Run in Terminal
-./setup.sh
+./scripts/setup/setup.sh
 ```
 
 The script will install via [Homebrew](https://brew.sh/):
@@ -45,7 +45,7 @@ The script will install via [Homebrew](https://brew.sh/):
 
 ```bash
 # Run in Terminal
-./setup.sh
+./scripts/setup/setup.sh
 ```
 
 The script will install:
