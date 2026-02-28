@@ -16,9 +16,11 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/gcc-15.2.0-h0dff253_18.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/gcc_impl_linux-64-15.2.0-he420e7e_18.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/go-1.25.7-h282a287_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/golangci-lint-1.64.8-ha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/icu-78.2-h33c6efd_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/kernel-headers_linux-64-4.18.0-he073ed8_9.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/ld_impl_linux-64-2.45.1-default_hbd61a6d_101.conda
+      - conda: https://conda.anaconda.org/conda-forge/linux-64/lefthook-2.1.1-hfc2019e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libbrotlicommon-1.2.0-hb03c661_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libbrotlidec-1.2.0-hb03c661_1.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/libbrotlienc-1.2.0-hb03c661_1.conda
@@ -50,7 +52,9 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/win-64/gcc-15.2.0-hd556455_18.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/gcc_impl_win-64-15.2.0-ha526d7c_18.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/go-1.25.7-h59133dd_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/golangci-lint-1.64.8-h57928b3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/ld_impl_win-64-2.45.1-default_hfd38196_101.conda
+      - conda: https://conda.anaconda.org/conda-forge/win-64/lefthook-2.1.1-h11686cb_0.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libgcc-15.2.0-h8ee18e1_18.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/libgcc-devel_win-64-15.2.0-hbb59886_118.conda
       - conda: https://conda.anaconda.org/conda-forge/win-64/libgfortran-15.2.0-h719f0c7_18.conda
@@ -261,6 +265,20 @@ packages:
   license_family: BSD
   size: 50321560
   timestamp: 1770238087593
+- conda: https://conda.anaconda.org/conda-forge/linux-64/golangci-lint-1.64.8-ha770c72_0.conda
+  sha256: d85514cb58dd3263a980fe99a3ed47e475ffa92b2565f02eeff5abe0ebd15a44
+  md5: 188452bb4c71590771d91e146f98f24a
+  license: GPL-3.0-only
+  license_family: GPL
+  size: 10637400
+  timestamp: 1742261740223
+- conda: https://conda.anaconda.org/conda-forge/win-64/golangci-lint-1.64.8-h57928b3_0.conda
+  sha256: 81c8edfb5cba4b7eb0fb0882e6b32a852c9abb2d6038b860bcaafb2728a35613
+  md5: a16c4c0d91c4f64e7f29467837cae21f
+  license: GPL-3.0-only
+  license_family: GPL
+  size: 10124854
+  timestamp: 1742262216619
 - conda: https://conda.anaconda.org/conda-forge/linux-64/icu-78.2-h33c6efd_0.conda
   sha256: 142a722072fa96cf16ff98eaaf641f54ab84744af81754c292cb81e0881c0329
   md5: 186a18e3ba246eccfc7cff00cd19a870
@@ -304,6 +322,20 @@ packages:
   license_family: GPL
   size: 876736
   timestamp: 1770267709635
+- conda: https://conda.anaconda.org/conda-forge/linux-64/lefthook-2.1.1-hfc2019e_0.conda
+  sha256: e8efb8381edcffe8ae7c10dc64480037e3cc0c16021b599c8b76a07769d05904
+  md5: 9f9cebad9936bc1743334084c0a27739
+  license: MIT
+  license_family: MIT
+  size: 5409727
+  timestamp: 1770905219267
+- conda: https://conda.anaconda.org/conda-forge/win-64/lefthook-2.1.1-h11686cb_0.conda
+  sha256: ffbb6455609f43a933df269b7b7c24a9e694864ab28428602d0fc7ee4a9962d7
+  md5: 03df7d6458d5c559f480ce31aa7c15fa
+  license: MIT
+  license_family: MIT
+  size: 5345121
+  timestamp: 1770905270840
 - conda: https://conda.anaconda.org/conda-forge/linux-64/libbrotlicommon-1.2.0-hb03c661_1.conda
   sha256: 318f36bd49ca8ad85e6478bd8506c88d82454cc008c1ac1c6bf00a3c42fa610e
   md5: 72c8fd1af66bd67bf580645b426513ed

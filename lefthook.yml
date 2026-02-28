@@ -1,0 +1,25 @@
+# Lefthook configuration for sub2api
+# https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    # Frontend React - Lint
+    frontend-react-lint:
+      glob: "frontend-react/**/*.{ts,tsx}"
+      run: cd frontend-react && pnpm run lint
+
+    # Frontend React - Type check
+    frontend-react-typecheck:
+      glob: "frontend-react/**/*.{ts,tsx}"
+      run: cd frontend-react && pnpm exec tsc --noEmit
+
+    # Backend Go - Format check
+    backend-go-fmt-check:
+      glob: "backend/**/*.go"
+      run: cd backend && test -z "$(pixi run gofmt -l .)" || (echo "Go files are not formatted. Run 'just fmt-go' to fix." && exit 1)
+
+    # Backend Go - Lint
+    backend-go-lint:
+      glob: "backend/**/*.go"
+      run: cd backend && pixi run golangci-lint run

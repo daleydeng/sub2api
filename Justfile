@@ -107,6 +107,17 @@ test-react:
     pixi run pnpm run lint
     pixi run pnpm run build
 
+# Pre-commit check for React frontend (lint + typecheck, no build)
+[working-directory('frontend-react')]
+precommit-react:
+    pixi run pnpm run lint
+    pixi run pnpm exec tsc --noEmit
+
+# Format React frontend code (if Prettier is configured in the future)
+[working-directory('frontend-react')]
+fmt-react:
+    @echo "No formatter configured for React frontend yet. Consider adding Prettier."
+
 # ── Build ───────────────────────────────────────
 
 # Build frontend and backend (default: Vue)
@@ -156,6 +167,22 @@ test-vue:
 [working-directory('backend')]
 test-backend:
     pixi run go test ./...
+
+# Format Go code
+[working-directory('backend')]
+fmt-go:
+    pixi run gofmt -w .
+
+# Lint Go code
+[working-directory('backend')]
+lint-go:
+    pixi run golangci-lint run
+
+# Pre-commit check for backend (format check + lint)
+[working-directory('backend')]
+precommit-go:
+    @if [ -n "$$(pixi run gofmt -l .)" ]; then echo "Go files not formatted. Run 'just fmt-go'" && exit 1; fi
+    pixi run golangci-lint run
 
 # ── Git & Collaboration ──────────────────────────
 

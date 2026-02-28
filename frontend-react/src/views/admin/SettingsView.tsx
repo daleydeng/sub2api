@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { useAppStore } from '@/stores/app'
 import { adminAPI } from '@/api/admin'
 import type { SystemSettings, StreamTimeoutSettings, AdminApiKeyStatus, UpdateSettingsRequest } from '@/api/admin/settings'
+import { extractErrorMessage } from '@/hooks/useDataTableQuery'
 import {
   RefreshIcon,
   EyeIcon,
@@ -103,8 +104,8 @@ export default function SettingsView() {
       setSettings(settingsData)
       setApiKeyStatus(keyData)
       setStreamTimeout(stData)
-    } catch (err: any) {
-      showError(t('admin.settings.failedToLoad', 'Failed to load settings'))
+    } catch (err: unknown) {
+      showError(extractErrorMessage(err as Error, t('admin.settings.failedToLoad', 'Failed to load settings')))
     } finally {
       setLoading(false)
     }
@@ -165,8 +166,8 @@ export default function SettingsView() {
       setTurnstileSecretKey('')
       setLinuxdoClientSecret('')
       showSuccess(t('admin.settings.settingsSaved', 'Settings saved successfully'))
-    } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || t('admin.settings.failedToSave', 'Failed to save settings'))
+    } catch (err: unknown) {
+      showError(extractErrorMessage(err as Error, t('admin.settings.failedToSave', 'Failed to save settings')))
     } finally {
       setSaving(false)
     }
@@ -183,8 +184,8 @@ export default function SettingsView() {
       const keyData = await adminAPI.settings.getAdminApiKey()
       setApiKeyStatus(keyData)
       showSuccess(t('admin.settings.adminApiKey.keyGenerated', 'New admin API key generated'))
-    } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || 'Failed to regenerate API key')
+    } catch (err: unknown) {
+      showError(extractErrorMessage(err as Error, 'Failed to regenerate API key'))
     } finally {
       setApiKeyLoading(false)
     }
@@ -197,8 +198,8 @@ export default function SettingsView() {
       setApiKeyStatus({ exists: false, masked_key: '' })
       setNewApiKey(null)
       showSuccess(t('admin.settings.adminApiKey.keyDeleted', 'Admin API key deleted'))
-    } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || 'Failed to delete API key')
+    } catch (err: unknown) {
+      showError(extractErrorMessage(err as Error, 'Failed to delete API key'))
     } finally {
       setApiKeyLoading(false)
     }
@@ -225,8 +226,8 @@ export default function SettingsView() {
         smtp_use_tls: settings.smtp_use_tls,
       })
       showSuccess(t('admin.settings.smtpConnectionSuccess', 'SMTP connection successful'))
-    } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || t('admin.settings.failedToTestSmtp', 'SMTP connection test failed'))
+    } catch (err: unknown) {
+      showError(extractErrorMessage(err as Error, t('admin.settings.failedToTestSmtp', 'SMTP connection test failed')))
     } finally {
       setTestingSmtp(false)
     }
@@ -247,8 +248,8 @@ export default function SettingsView() {
         smtp_use_tls: settings.smtp_use_tls,
       })
       showSuccess(t('admin.settings.testEmailSent', 'Test email sent successfully'))
-    } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || t('admin.settings.failedToSendTestEmail', 'Failed to send test email'))
+    } catch (err: unknown) {
+      showError(extractErrorMessage(err as Error, t('admin.settings.failedToSendTestEmail', 'Failed to send test email')))
     } finally {
       setSendingTestEmail(false)
     }
@@ -262,8 +263,8 @@ export default function SettingsView() {
       const updated = await adminAPI.settings.updateStreamTimeoutSettings(streamTimeout)
       setStreamTimeout(updated)
       showSuccess(t('admin.settings.streamTimeout.saved', 'Stream timeout settings saved'))
-    } catch (err: any) {
-      showError(err?.response?.data?.detail || err?.message || t('admin.settings.streamTimeout.saveFailed', 'Failed to save stream timeout settings'))
+    } catch (err: unknown) {
+      showError(extractErrorMessage(err as Error, t('admin.settings.streamTimeout.saveFailed', 'Failed to save stream timeout settings')))
     }
   }
 
@@ -349,7 +350,7 @@ export default function SettingsView() {
           ] as [keyof SystemSettings, string][]).map(([key, label]) => (
             <div key={key} className="flex items-center justify-between">
               <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
-              <Toggle value={settings[key] as boolean} onChange={(v) => updateField(key, v as any)} />
+              <Toggle value={settings[key] as boolean} onChange={(v) => updateField(key, v as SystemSettings[typeof key])} />
             </div>
           ))}
         </div>
