@@ -109,7 +109,7 @@ backend/data/
 *.rdb
 
 # Local development env (contains credentials)
-.env.dev
+# .env.dev
 
 # ===================
 # 本地配置文件（包含敏感信息）
