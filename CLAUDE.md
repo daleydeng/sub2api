@@ -401,6 +401,20 @@ ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=pass123 ./server
 
 ## Git 工作流
 
+**⚠️ 重要工作流程偏好：**
+
+除非用户明确要求，否则 **不要主动执行以下操作**：
+- `git commit` - 不要主动提交代码
+- `git push` - 不要主动推送到远程仓库
+- `git pr` 或创建 Pull Request - 不要主动创建 PR
+
+**只有在用户明确说"可以 commit 了"、"push 吧"、"做 PR"等指令时才执行这些操作。**
+
+完成代码修改后，应该：
+1. 运行 lint 和 type check 确保代码质量
+2. 向用户报告修改完成，等待进一步指示
+3. 不要自作主张进行 Git 操作
+
 **仓库关系：**
 
 - **Wei-Shaw/sub2api** — 原项目（仅 Vue，无 React）
