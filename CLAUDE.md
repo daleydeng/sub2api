@@ -212,9 +212,11 @@ React 版本 (`frontend-react/`) 与 Vue 版本 (`frontend/`) 在以下方面存
 - ❌ SMTP 连接测试按钮 (`testSmtpConnection`)
 - ❌ 发送测试邮件功能 (`sendTestEmail`)
 - ❌ LinuxDo OAuth 登录配置整个部分 (`linuxdo_connect_*` 所有字段)
+- ❌ TOTP Two-Factor Authentication (2FA) 功能 (`totp_enabled` 及相关字段)
 - **理由：**
   - SMTP 测试：简化管理界面 UX，SMTP 配置可通过实际发送验证邮件来测试
   - LinuxDo OAuth：不需要此第三方登录功能
+  - TOTP 2FA：不需要双因素认证功能
 
 #### 不同的实现方式
 

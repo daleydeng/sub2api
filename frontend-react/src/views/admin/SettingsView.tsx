@@ -10,14 +10,7 @@ import { useAppStore } from '@/stores/app'
 import { adminAPI } from '@/api/admin'
 import type { SystemSettings, StreamTimeoutSettings, AdminApiKeyStatus, UpdateSettingsRequest } from '@/api/admin/settings'
 import { extractErrorMessage } from '@/hooks/useDataTableQuery'
-import {
-  RefreshIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  TrashIcon,
-  CheckIcon,
-  ClipboardIcon,
-} from '@/components/icons'
+import { CheckIcon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -73,7 +66,6 @@ export default function SettingsView() {
   // Admin API Key
   const [apiKeyStatus, setApiKeyStatus] = useState<AdminApiKeyStatus | null>(null)
   const [newApiKey, setNewApiKey] = useState<string | null>(null)
-  const [showApiKey, setShowApiKey] = useState(false)
   const [apiKeyLoading, setApiKeyLoading] = useState(false)
 
   // Stream timeout
@@ -84,6 +76,9 @@ export default function SettingsView() {
 
   // Turnstile secret
   const [turnstileSecretKey, setTurnstileSecretKey] = useState('')
+
+  // Site logo upload
+  const [logoError, setLogoError] = useState('')
 
   // ==================== Data Loading ====================
 
@@ -125,7 +120,6 @@ export default function SettingsView() {
         promo_code_enabled: settings.promo_code_enabled,
         password_reset_enabled: settings.password_reset_enabled,
         invitation_code_enabled: settings.invitation_code_enabled,
-        totp_enabled: settings.totp_enabled,
         default_balance: settings.default_balance,
         default_concurrency: settings.default_concurrency,
         site_name: settings.site_name,
@@ -169,7 +163,6 @@ export default function SettingsView() {
     try {
       const result = await adminAPI.settings.regenerateAdminApiKey()
       setNewApiKey(result.key)
-      setShowApiKey(true)
       const keyData = await adminAPI.settings.getAdminApiKey()
       setApiKeyStatus(keyData)
       showSuccess(t('admin.settings.adminApiKey.keyGenerated', 'New admin API key generated'))
@@ -198,6 +191,57 @@ export default function SettingsView() {
     if (newApiKey) {
       await navigator.clipboard.writeText(newApiKey)
       showSuccess(t('common.copied', 'Copied to clipboard'))
+    }
+  }
+
+  // ==================== Logo Upload ====================
+
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    setLogoError('')
+
+    if (!file) return
+
+    // Check file size (300KB = 307200 bytes)
+    const maxSize = 300 * 1024
+    if (file.size > maxSize) {
+      setLogoError(
+        t('admin.settings.site.logoSizeError', {
+          defaultValue: `File size {{size}}KB exceeds 300KB limit`,
+          size: (file.size / 1024).toFixed(1),
+        })
+      )
+      event.target.value = ''
+      return
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      setLogoError(t('admin.settings.site.logoTypeError', 'Please upload an image file'))
+      event.target.value = ''
+      return
+    }
+
+    // Convert to base64
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (settings && e.target?.result) {
+        updateField('site_logo', e.target.result as string)
+      }
+    }
+    reader.onerror = () => {
+      setLogoError(t('admin.settings.site.logoReadError', 'Failed to read image file'))
+    }
+    reader.readAsDataURL(file)
+
+    // Reset input
+    event.target.value = ''
+  }
+
+  const handleRemoveLogo = () => {
+    if (settings) {
+      updateField('site_logo', '')
+      setLogoError('')
     }
   }
 
@@ -230,44 +274,85 @@ export default function SettingsView() {
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Admin API Key */}
       <SectionCard title={t('admin.settings.adminApiKey.title', 'Admin API Key')} description={t('admin.settings.adminApiKey.description', 'Global API key for external system integration with full admin access')}>
-        <div className="flex items-center gap-3">
-          {apiKeyStatus?.exists ? (
-            <>
-              <code className="code flex-1 truncate">{apiKeyStatus.masked_key}</code>
-              <Button variant="secondary" size="sm" onClick={handleRegenerateApiKey} disabled={apiKeyLoading}>
-                <RefreshIcon className="h-4 w-4" />
-                {t('admin.settings.adminApiKey.regenerate', 'Regenerate')}
-              </Button>
-              <Button variant="destructive" size="sm" onClick={handleDeleteApiKey} disabled={apiKeyLoading}>
-                <TrashIcon className="h-4 w-4" />
-                {t('common.delete', 'Delete')}
-              </Button>
-            </>
-          ) : (
-            <>
-              <span className="text-sm text-gray-500">{t('admin.settings.adminApiKey.notConfigured', 'Admin API key not configured')}</span>
-              <Button size="sm" onClick={handleRegenerateApiKey} disabled={apiKeyLoading}>
-                {apiKeyLoading ? <span className="spinner h-4 w-4" /> : t('admin.settings.adminApiKey.create', 'Create Key')}
-              </Button>
-            </>
-          )}
-        </div>
-        {newApiKey && (
-          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
-            <p className="mb-2 text-xs font-medium text-amber-800 dark:text-amber-200">
-              {t('admin.settings.adminApiKey.keyWarning', 'This key will only be shown once. Please copy it now.')}
+        {/* Security Warning */}
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
+          <div className="flex items-start">
+            <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <p className="ml-3 text-sm text-amber-700 dark:text-amber-300">
+              {t('admin.settings.adminApiKey.securityWarning', 'This API key grants full admin access. Store it securely and rotate regularly.')}
             </p>
-            <div className="flex items-center gap-2">
-              <code className="code flex-1 text-xs break-all">
-                {showApiKey ? newApiKey : '****' + newApiKey.slice(-8)}
-              </code>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowApiKey(!showApiKey)}>
-                {showApiKey ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={copyApiKey}>
-                <ClipboardIcon className="h-4 w-4" />
-              </Button>
+          </div>
+        </div>
+
+        {/* Loading State */}
+        {apiKeyLoading ? (
+          <div className="flex items-center gap-2 text-gray-500">
+            <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-primary-600" />
+            {t('common.loading', 'Loading...')}
+          </div>
+        ) : apiKeyStatus?.exists ? (
+          /* Key Exists */
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t('admin.settings.adminApiKey.currentKey', 'Current Key')}
+                </label>
+                <code className="rounded bg-gray-100 px-2 py-1 font-mono text-sm text-gray-900 dark:bg-dark-700 dark:text-gray-100">
+                  {apiKeyStatus.masked_key}
+                </code>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="secondary" size="sm" onClick={handleRegenerateApiKey} disabled={apiKeyLoading}>
+                  {apiKeyLoading ? t('admin.settings.adminApiKey.regenerating', 'Regenerating...') : t('admin.settings.adminApiKey.regenerate', 'Regenerate')}
+                </Button>
+                <Button variant="secondary" size="sm" onClick={handleDeleteApiKey} disabled={apiKeyLoading} className="text-red-600 hover:text-red-700 dark:text-red-400">
+                  {t('admin.settings.adminApiKey.delete', 'Delete')}
+                </Button>
+              </div>
             </div>
+
+            {/* Newly Generated Key Display */}
+            {newApiKey && (
+              <div className="space-y-3 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+                <p className="text-sm font-medium text-green-700 dark:text-green-300">
+                  {t('admin.settings.adminApiKey.keyWarning', 'This key will only be shown once. Please copy it now.')}
+                </p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 select-all break-all rounded border border-green-300 bg-white px-3 py-2 font-mono text-sm dark:border-green-700 dark:bg-dark-800">
+                    {newApiKey}
+                  </code>
+                  <Button variant="default" size="sm" onClick={copyApiKey} className="flex-shrink-0">
+                    {t('admin.settings.adminApiKey.copyKey', 'Copy Key')}
+                  </Button>
+                </div>
+                <p className="text-xs text-green-600 dark:text-green-400">
+                  {t('admin.settings.adminApiKey.usage', 'Use this key in the Authorization header: Bearer YOUR_KEY')}
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* No Key Configured */
+          <div className="flex items-center justify-between">
+            <span className="text-gray-500 dark:text-gray-400">
+              {t('admin.settings.adminApiKey.notConfigured', 'Admin API key not configured')}
+            </span>
+            <Button size="sm" onClick={handleRegenerateApiKey} disabled={apiKeyLoading}>
+              {apiKeyLoading ? (
+                <>
+                  <svg className="mr-1 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  {t('admin.settings.adminApiKey.creating', 'Creating...')}
+                </>
+              ) : (
+                t('admin.settings.adminApiKey.create', 'Create Key')
+              )}
+            </Button>
           </div>
         )}
       </SectionCard>
@@ -341,28 +426,6 @@ export default function SettingsView() {
           </div>
         )}
 
-        {/* TOTP 2FA */}
-        <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700">
-          <div>
-            <label className="font-medium text-gray-900 dark:text-white">
-              {t('admin.settings.registration.totp', 'Two-Factor Authentication (2FA)')}
-            </label>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t('admin.settings.registration.totpHint', 'Allow users to enable TOTP 2FA')}
-            </p>
-            {!settings.totp_encryption_key_configured && (
-              <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
-                {t('admin.settings.registration.totpKeyNotConfigured', 'TOTP encryption key not configured in environment')}
-              </p>
-            )}
-          </div>
-          <Toggle
-            value={settings.totp_enabled}
-            onChange={(v) => updateField('totp_enabled', v)}
-            disabled={!settings.totp_encryption_key_configured}
-          />
-        </div>
-
         {/* Onboarding Tour */}
         <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700">
           <div>
@@ -379,7 +442,7 @@ export default function SettingsView() {
 
       {/* Default Settings */}
       <SectionCard title={t('admin.settings.defaults.title', 'Default User Settings')} description={t('admin.settings.defaults.description', 'Default values for new users')}>
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
               {t('admin.settings.defaults.defaultBalance', 'Default Balance')}
@@ -388,10 +451,10 @@ export default function SettingsView() {
               type="number"
               className="input"
               value={settings.default_balance}
-              onChange={(e) => updateField('default_balance', parseFloat(e.target.value) || 0)}
+              onChange={(e) => updateField('default_balance', parseFloat(e.target.value) || 10)}
               step="0.01"
               min="0"
-              placeholder="0.00"
+              placeholder="10.00"
             />
             <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
               {t('admin.settings.defaults.defaultBalanceHint', 'Initial balance for new users')}
@@ -500,6 +563,57 @@ export default function SettingsView() {
           <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
             {t('admin.settings.site.docUrlHint', 'Link to documentation')}
           </p>
+        </div>
+
+        {/* Site Logo Upload */}
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('admin.settings.site.siteLogo', 'Site Logo')}
+          </label>
+          <div className="flex items-start gap-6">
+            {/* Logo Preview */}
+            <div className="flex-shrink-0">
+              <div
+                className={`flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl border-2 bg-gray-50 dark:bg-dark-800 ${
+                  settings.site_logo
+                    ? 'border-solid border-gray-300 dark:border-dark-600'
+                    : 'border-dashed border-gray-300 dark:border-dark-600'
+                }`}
+              >
+                {settings.site_logo ? (
+                  <img src={settings.site_logo} alt="Site Logo" className="h-full w-full object-contain" />
+                ) : (
+                  <svg className="h-8 w-8 text-gray-400 dark:text-dark-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            {/* Upload Controls */}
+            <div className="flex-1 space-y-3">
+              <div className="flex items-center gap-3">
+                <label className="btn btn-secondary btn-sm cursor-pointer">
+                  <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                  <svg className="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  {t('admin.settings.site.uploadImage', 'Upload Image')}
+                </label>
+                {settings.site_logo && (
+                  <Button variant="secondary" size="sm" onClick={handleRemoveLogo} className="text-red-600 hover:text-red-700 dark:text-red-400">
+                    <svg className="mr-1.5 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    {t('admin.settings.site.remove', 'Remove')}
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {t('admin.settings.site.logoHint', 'PNG, JPG or SVG. Max 300KB. Recommended size: 200x200px.')}
+              </p>
+              {logoError && <p className="text-xs text-red-500">{logoError}</p>}
+            </div>
+          </div>
         </div>
 
         {/* Home Content */}
