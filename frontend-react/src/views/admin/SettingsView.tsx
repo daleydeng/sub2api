@@ -47,11 +47,11 @@ function Toggle({ value, onChange, disabled }: { value: boolean; onChange: (v: b
 function SectionCard({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
     <div className="card">
-      <div className="card-header">
-        <h3 className="text-base font-semibold text-gray-900 dark:text-white">{title}</h3>
-        {description && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{description}</p>}
+      <div className="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
+        {description && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>}
       </div>
-      <div className="card-body space-y-4">
+      <div className="space-y-5 p-6">
         {children}
       </div>
     </div>
@@ -78,11 +78,6 @@ export default function SettingsView() {
 
   // Stream timeout
   const [streamTimeout, setStreamTimeout] = useState<StreamTimeoutSettings | null>(null)
-
-  // SMTP test
-  const [testingSmtp, setTestingSmtp] = useState(false)
-  const [testEmail, setTestEmail] = useState('')
-  const [sendingTestEmail, setSendingTestEmail] = useState(false)
 
   // SMTP password (separate from settings since settings returns configured flag)
   const [smtpPassword, setSmtpPassword] = useState('')
@@ -212,49 +207,6 @@ export default function SettingsView() {
     }
   }
 
-  // ==================== SMTP Test ====================
-
-  const handleTestSmtp = async () => {
-    if (!settings) return
-    setTestingSmtp(true)
-    try {
-      await adminAPI.settings.testSmtpConnection({
-        smtp_host: settings.smtp_host,
-        smtp_port: settings.smtp_port,
-        smtp_username: settings.smtp_username,
-        smtp_password: smtpPassword || 'CONFIGURED',
-        smtp_use_tls: settings.smtp_use_tls,
-      })
-      showSuccess(t('admin.settings.smtpConnectionSuccess', 'SMTP connection successful'))
-    } catch (err: unknown) {
-      showError(extractErrorMessage(err as Error, t('admin.settings.failedToTestSmtp', 'SMTP connection test failed')))
-    } finally {
-      setTestingSmtp(false)
-    }
-  }
-
-  const handleSendTestEmail = async () => {
-    if (!settings || !testEmail) return
-    setSendingTestEmail(true)
-    try {
-      await adminAPI.settings.sendTestEmail({
-        email: testEmail,
-        smtp_host: settings.smtp_host,
-        smtp_port: settings.smtp_port,
-        smtp_username: settings.smtp_username,
-        smtp_password: smtpPassword || 'CONFIGURED',
-        smtp_from_email: settings.smtp_from_email,
-        smtp_from_name: settings.smtp_from_name,
-        smtp_use_tls: settings.smtp_use_tls,
-      })
-      showSuccess(t('admin.settings.testEmailSent', 'Test email sent successfully'))
-    } catch (err: unknown) {
-      showError(extractErrorMessage(err as Error, t('admin.settings.failedToSendTestEmail', 'Failed to send test email')))
-    } finally {
-      setSendingTestEmail(false)
-    }
-  }
-
   // ==================== Stream Timeout ====================
 
   const handleSaveStreamTimeout = async () => {
@@ -281,18 +233,7 @@ export default function SettingsView() {
   if (!settings) return null
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="page-title">{t('admin.settings.title', 'Settings')}</h1>
-          <p className="page-description">{t('admin.settings.description', 'System configuration')}</p>
-        </div>
-        <Button variant="ghost" size="icon" onClick={loadSettings} title={t('common.refresh', 'Refresh')}>
-          <RefreshIcon className="h-4 w-4" />
-        </Button>
-      </div>
-
+    <div className="mx-auto max-w-4xl space-y-6">
       {/* Admin API Key */}
       <SectionCard title={t('admin.settings.adminApiKey.title', 'Admin API Key')} description={t('admin.settings.adminApiKey.description', 'Global API key for external system integration with full admin access')}>
         <div className="flex items-center gap-3">
@@ -339,239 +280,405 @@ export default function SettingsView() {
 
       {/* Registration */}
       <SectionCard title={t('admin.settings.registration.title', 'Registration Settings')} description={t('admin.settings.registration.description', 'Control user registration and verification')}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {([
-            ['registration_enabled', t('admin.settings.registration.enableRegistration', 'Registration Enabled')],
-            ['email_verify_enabled', t('admin.settings.registration.emailVerification', 'Email Verification')],
-            ['promo_code_enabled', t('admin.settings.registration.promoCode', 'Promo Code')],
-            ['invitation_code_enabled', t('admin.settings.registration.invitationCode', 'Invitation Code Registration')],
-            ['totp_enabled', t('admin.settings.registration.totp', 'Two-Factor Authentication (2FA)')],
-            ['onboarding_enabled', t('admin.settings.registration.onboardingTour', 'Onboarding Tour')],
-          ] as [keyof SystemSettings, string][]).map(([key, label]) => (
-            <div key={key} className="flex items-center justify-between">
-              <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
-              <Toggle value={settings[key] as boolean} onChange={(v) => updateField(key, v as SystemSettings[typeof key])} />
+        {/* Enable Registration */}
+        <div className="flex items-center justify-between">
+          <div>
+            <label className="font-medium text-gray-900 dark:text-white">
+              {t('admin.settings.registration.enableRegistration', 'Registration Enabled')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('admin.settings.registration.enableRegistrationHint', 'Allow new users to register accounts')}
+            </p>
+          </div>
+          <Toggle value={settings.registration_enabled} onChange={(v) => updateField('registration_enabled', v)} />
+        </div>
+
+        {/* Email Verification */}
+        <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700">
+          <div>
+            <label className="font-medium text-gray-900 dark:text-white">
+              {t('admin.settings.registration.emailVerification', 'Email Verification')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('admin.settings.registration.emailVerificationHint', 'Require email verification during registration')}
+            </p>
+          </div>
+          <Toggle value={settings.email_verify_enabled} onChange={(v) => updateField('email_verify_enabled', v)} />
+        </div>
+
+        {/* Promo Code */}
+        <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700">
+          <div>
+            <label className="font-medium text-gray-900 dark:text-white">
+              {t('admin.settings.registration.promoCode', 'Promo Code')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('admin.settings.registration.promoCodeHint', 'Allow users to use promo codes during registration')}
+            </p>
+          </div>
+          <Toggle value={settings.promo_code_enabled} onChange={(v) => updateField('promo_code_enabled', v)} />
+        </div>
+
+        {/* Invitation Code */}
+        <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700">
+          <div>
+            <label className="font-medium text-gray-900 dark:text-white">
+              {t('admin.settings.registration.invitationCode', 'Invitation Code Registration')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('admin.settings.registration.invitationCodeHint', 'Require invitation code for registration')}
+            </p>
+          </div>
+          <Toggle value={settings.invitation_code_enabled} onChange={(v) => updateField('invitation_code_enabled', v)} />
+        </div>
+
+        {/* Password Reset - Only show when email verification is enabled */}
+        {settings.email_verify_enabled && (
+          <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700">
+            <div>
+              <label className="font-medium text-gray-900 dark:text-white">
+                {t('admin.settings.registration.passwordReset', 'Password Reset')}
+              </label>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {t('admin.settings.registration.passwordResetHint', 'Allow users to reset password via email')}
+              </p>
             </div>
-          ))}
+            <Toggle value={settings.password_reset_enabled} onChange={(v) => updateField('password_reset_enabled', v)} />
+          </div>
+        )}
+
+        {/* TOTP 2FA */}
+        <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700">
+          <div>
+            <label className="font-medium text-gray-900 dark:text-white">
+              {t('admin.settings.registration.totp', 'Two-Factor Authentication (2FA)')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('admin.settings.registration.totpHint', 'Allow users to enable TOTP 2FA')}
+            </p>
+            {!settings.totp_encryption_key_configured && (
+              <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
+                {t('admin.settings.registration.totpKeyNotConfigured', 'TOTP encryption key not configured in environment')}
+              </p>
+            )}
+          </div>
+          <Toggle
+            value={settings.totp_enabled}
+            onChange={(v) => updateField('totp_enabled', v)}
+            disabled={!settings.totp_encryption_key_configured}
+          />
+        </div>
+
+        {/* Onboarding Tour */}
+        <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700">
+          <div>
+            <label className="font-medium text-gray-900 dark:text-white">
+              {t('admin.settings.registration.onboardingTour', 'Onboarding Tour')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('admin.settings.registration.onboardingTourHint', 'Show onboarding tour for new users')}
+            </p>
+          </div>
+          <Toggle value={settings.onboarding_enabled} onChange={(v) => updateField('onboarding_enabled', v)} />
         </div>
       </SectionCard>
 
       {/* Default Settings */}
       <SectionCard title={t('admin.settings.defaults.title', 'Default User Settings')} description={t('admin.settings.defaults.description', 'Default values for new users')}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6">
           <div>
-            <label className="input-label">{t('admin.settings.defaults.defaultBalance', 'Default Balance')}</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t('admin.settings.defaults.defaultBalance', 'Default Balance')}
+            </label>
             <input
               type="number"
               className="input"
               value={settings.default_balance}
               onChange={(e) => updateField('default_balance', parseFloat(e.target.value) || 0)}
               step="0.01"
+              min="0"
+              placeholder="0.00"
             />
+            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+              {t('admin.settings.defaults.defaultBalanceHint', 'Initial balance for new users')}
+            </p>
           </div>
           <div>
-            <label className="input-label">{t('admin.settings.defaults.defaultConcurrency', 'Default Concurrency')}</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t('admin.settings.defaults.defaultConcurrency', 'Default Concurrency')}
+            </label>
             <input
               type="number"
               className="input"
               value={settings.default_concurrency}
               onChange={(e) => updateField('default_concurrency', parseInt(e.target.value) || 1)}
               min={1}
+              placeholder="1"
             />
+            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+              {t('admin.settings.defaults.defaultConcurrencyHint', 'Maximum concurrent requests for new users')}
+            </p>
           </div>
         </div>
       </SectionCard>
 
       {/* Site Settings */}
       <SectionCard title={t('admin.settings.site.title', 'Site Settings')} description={t('admin.settings.site.description', 'Customize site branding')}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <label className="input-label">{t('admin.settings.site.siteName', 'Site Name')}</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t('admin.settings.site.siteName', 'Site Name')}
+            </label>
             <input
               type="text"
               className="input"
               value={settings.site_name}
               onChange={(e) => updateField('site_name', e.target.value)}
+              placeholder={t('admin.settings.site.siteNamePlaceholder', 'My Site')}
             />
+            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+              {t('admin.settings.site.siteNameHint', 'Site name shown in title and branding')}
+            </p>
           </div>
           <div>
-            <label className="input-label">{t('admin.settings.site.siteSubtitle', 'Site Subtitle')}</label>
+            <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t('admin.settings.site.siteSubtitle', 'Site Subtitle')}
+            </label>
             <input
               type="text"
               className="input"
               value={settings.site_subtitle}
               onChange={(e) => updateField('site_subtitle', e.target.value)}
+              placeholder={t('admin.settings.site.siteSubtitlePlaceholder', 'A great service')}
             />
-          </div>
-          <div>
-            <label className="input-label">{t('admin.settings.site.apiBaseUrl', 'API Base URL')}</label>
-            <input
-              type="text"
-              className="input"
-              value={settings.api_base_url}
-              onChange={(e) => updateField('api_base_url', e.target.value)}
-              placeholder="https://api.example.com"
-            />
-          </div>
-          <div>
-            <label className="input-label">{t('admin.settings.site.contactInfo', 'Contact Info')}</label>
-            <input
-              type="text"
-              className="input"
-              value={settings.contact_info}
-              onChange={(e) => updateField('contact_info', e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="input-label">{t('admin.settings.site.docUrl', 'Documentation URL')}</label>
-            <input
-              type="text"
-              className="input"
-              value={settings.doc_url}
-              onChange={(e) => updateField('doc_url', e.target.value)}
-              placeholder="https://docs.example.com"
-            />
+            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+              {t('admin.settings.site.siteSubtitleHint', 'Subtitle shown under site name')}
+            </p>
           </div>
         </div>
+
+        {/* API Base URL */}
         <div>
-          <label className="input-label">{t('admin.settings.site.homeContent', 'Home Page Content')}</label>
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('admin.settings.site.apiBaseUrl', 'API Base URL')}
+          </label>
+          <input
+            type="text"
+            className="input font-mono text-sm"
+            value={settings.api_base_url}
+            onChange={(e) => updateField('api_base_url', e.target.value)}
+            placeholder={t('admin.settings.site.apiBaseUrlPlaceholder', 'https://api.example.com')}
+          />
+          <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+            {t('admin.settings.site.apiBaseUrlHint', 'Base URL for API endpoints')}
+          </p>
+        </div>
+
+        {/* Contact Info */}
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('admin.settings.site.contactInfo', 'Contact Info')}
+          </label>
+          <input
+            type="text"
+            className="input"
+            value={settings.contact_info}
+            onChange={(e) => updateField('contact_info', e.target.value)}
+            placeholder={t('admin.settings.site.contactInfoPlaceholder', 'support@example.com')}
+          />
+          <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+            {t('admin.settings.site.contactInfoHint', 'Contact information shown to users')}
+          </p>
+        </div>
+
+        {/* Doc URL */}
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('admin.settings.site.docUrl', 'Documentation URL')}
+          </label>
+          <input
+            type="url"
+            className="input font-mono text-sm"
+            value={settings.doc_url}
+            onChange={(e) => updateField('doc_url', e.target.value)}
+            placeholder={t('admin.settings.site.docUrlPlaceholder', 'https://docs.example.com')}
+          />
+          <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+            {t('admin.settings.site.docUrlHint', 'Link to documentation')}
+          </p>
+        </div>
+
+        {/* Home Content */}
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('admin.settings.site.homeContent', 'Home Page Content')}
+          </label>
           <textarea
-            className="input font-mono text-xs"
+            className="input font-mono text-sm"
             rows={4}
             value={settings.home_content}
             onChange={(e) => updateField('home_content', e.target.value)}
+            placeholder={t('admin.settings.site.homeContentPlaceholder', 'Markdown content for home page')}
           />
+          <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+            {t('admin.settings.site.homeContentHint', 'Markdown content shown on home page')}
+          </p>
         </div>
       </SectionCard>
 
       {/* SMTP Settings (shown when email_verify is enabled) */}
       {settings.email_verify_enabled && (
         <SectionCard title={t('admin.settings.smtp.title', 'SMTP Settings')} description={t('admin.settings.smtp.description', 'Configure email sending for verification codes')}>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <label className="input-label">{t('admin.settings.smtp.host', 'SMTP Host')}</label>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('admin.settings.smtp.host', 'SMTP Host')}
+              </label>
               <input
                 type="text"
                 className="input"
                 value={settings.smtp_host}
                 onChange={(e) => updateField('smtp_host', e.target.value)}
-                placeholder="smtp.example.com"
+                placeholder={t('admin.settings.smtp.hostPlaceholder', 'smtp.example.com')}
               />
             </div>
             <div>
-              <label className="input-label">{t('admin.settings.smtp.port', 'SMTP Port')}</label>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('admin.settings.smtp.port', 'SMTP Port')}
+              </label>
               <input
                 type="number"
                 className="input"
                 value={settings.smtp_port}
                 onChange={(e) => updateField('smtp_port', parseInt(e.target.value) || 587)}
+                placeholder={t('admin.settings.smtp.portPlaceholder', '587')}
               />
             </div>
             <div>
-              <label className="input-label">{t('admin.settings.smtp.username', 'SMTP Username')}</label>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('admin.settings.smtp.username', 'SMTP Username')}
+              </label>
               <input
                 type="text"
                 className="input"
                 value={settings.smtp_username}
                 onChange={(e) => updateField('smtp_username', e.target.value)}
+                placeholder={t('admin.settings.smtp.usernamePlaceholder', 'user@example.com')}
               />
             </div>
             <div>
-              <label className="input-label">
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 {t('admin.settings.smtp.password', 'SMTP Password')}
-                {settings.smtp_password_configured && (
-                  <span className="ml-2 text-xs text-emerald-600">{t('admin.settings.smtp.passwordConfiguredHint', 'Password configured')}</span>
-                )}
               </label>
               <input
                 type="password"
                 className="input"
                 value={smtpPassword}
                 onChange={(e) => setSmtpPassword(e.target.value)}
-                placeholder={settings.smtp_password_configured ? t('admin.settings.smtp.passwordHint', 'Leave empty to keep existing password') : ''}
+                placeholder={
+                  settings.smtp_password_configured
+                    ? t('admin.settings.smtp.passwordConfiguredPlaceholder', 'Leave empty to keep existing')
+                    : t('admin.settings.smtp.passwordPlaceholder', 'Enter password')
+                }
               />
+              <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                {settings.smtp_password_configured
+                  ? t('admin.settings.smtp.passwordConfiguredHint', 'Password configured, leave empty to keep')
+                  : t('admin.settings.smtp.passwordHint', 'Enter SMTP password')}
+              </p>
             </div>
             <div>
-              <label className="input-label">{t('admin.settings.smtp.fromEmail', 'From Email')}</label>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('admin.settings.smtp.fromEmail', 'From Email')}
+              </label>
               <input
                 type="email"
                 className="input"
                 value={settings.smtp_from_email}
                 onChange={(e) => updateField('smtp_from_email', e.target.value)}
+                placeholder={t('admin.settings.smtp.fromEmailPlaceholder', 'noreply@example.com')}
               />
             </div>
             <div>
-              <label className="input-label">{t('admin.settings.smtp.fromName', 'From Name')}</label>
+              <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('admin.settings.smtp.fromName', 'From Name')}
+              </label>
               <input
                 type="text"
                 className="input"
                 value={settings.smtp_from_name}
                 onChange={(e) => updateField('smtp_from_name', e.target.value)}
+                placeholder={t('admin.settings.smtp.fromNamePlaceholder', 'My Site')}
               />
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.smtp.useTls', 'Use TLS')}</span>
-              <Toggle value={settings.smtp_use_tls} onChange={(v) => updateField('smtp_use_tls', v)} />
+
+          {/* Use TLS Toggle */}
+          <div className="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700">
+            <div>
+              <label className="font-medium text-gray-900 dark:text-white">
+                {t('admin.settings.smtp.useTls', 'Use TLS')}
+              </label>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {t('admin.settings.smtp.useTlsHint', 'Enable TLS encryption for SMTP connection')}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="secondary" size="sm" onClick={handleTestSmtp} disabled={testingSmtp}>
-                {testingSmtp ? <span className="spinner h-3 w-3" /> : t('admin.settings.smtp.testConnection', 'Test Connection')}
-              </Button>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="email"
-              className="input flex-1"
-              value={testEmail}
-              onChange={(e) => setTestEmail(e.target.value)}
-              placeholder={t('admin.settings.testEmail.recipientEmailPlaceholder', 'Enter email address for test')}
-            />
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleSendTestEmail}
-              disabled={sendingTestEmail || !testEmail}
-            >
-              {sendingTestEmail ? <span className="spinner h-3 w-3" /> : t('admin.settings.testEmail.sendTestEmail', 'Send Test Email')}
-            </Button>
+            <Toggle value={settings.smtp_use_tls} onChange={(v) => updateField('smtp_use_tls', v)} />
           </div>
         </SectionCard>
       )}
 
       {/* Cloudflare Turnstile */}
       <SectionCard title={t('admin.settings.turnstile.title', 'Cloudflare Turnstile')} description={t('admin.settings.turnstile.description', 'Bot protection for login and registration')}>
+        {/* Enable Turnstile */}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.turnstile.enableTurnstile', 'Enable Turnstile')}</span>
+          <div>
+            <label className="font-medium text-gray-900 dark:text-white">
+              {t('admin.settings.turnstile.enableTurnstile', 'Enable Turnstile')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('admin.settings.turnstile.enableTurnstileHint', 'Enable Cloudflare Turnstile for bot protection')}
+            </p>
+          </div>
           <Toggle value={settings.turnstile_enabled} onChange={(v) => updateField('turnstile_enabled', v)} />
         </div>
+
+        {/* Turnstile Keys - Only show when enabled */}
         {settings.turnstile_enabled && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="input-label">{t('admin.settings.turnstile.siteKey', 'Site Key')}</label>
-              <input
-                type="text"
-                className="input"
-                value={settings.turnstile_site_key}
-                onChange={(e) => updateField('turnstile_site_key', e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="input-label">
-                {t('admin.settings.turnstile.secretKey', 'Secret Key')}
-                {settings.turnstile_secret_key_configured && (
-                  <span className="ml-2 text-xs text-emerald-600">{t('admin.settings.turnstile.secretKeyConfiguredHint', 'Secret key configured')}</span>
-                )}
-              </label>
-              <input
-                type="password"
-                className="input"
-                value={turnstileSecretKey}
-                onChange={(e) => setTurnstileSecretKey(e.target.value)}
-                placeholder={settings.turnstile_secret_key_configured ? t('admin.settings.turnstile.secretKeyHint', 'Leave empty to keep the current value') : ''}
-              />
+          <div className="border-t border-gray-100 pt-4 dark:border-dark-700">
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t('admin.settings.turnstile.siteKey', 'Site Key')}
+                </label>
+                <input
+                  type="text"
+                  className="input font-mono text-sm"
+                  value={settings.turnstile_site_key}
+                  onChange={(e) => updateField('turnstile_site_key', e.target.value)}
+                  placeholder="0x4AAAAAAA..."
+                />
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {t('admin.settings.turnstile.siteKeyHint', 'Get from Cloudflare Dashboard')}
+                </p>
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t('admin.settings.turnstile.secretKey', 'Secret Key')}
+                </label>
+                <input
+                  type="password"
+                  className="input font-mono text-sm"
+                  value={turnstileSecretKey}
+                  onChange={(e) => setTurnstileSecretKey(e.target.value)}
+                  placeholder="0x4AAAAAAA..."
+                />
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {settings.turnstile_secret_key_configured
+                    ? t('admin.settings.turnstile.secretKeyConfiguredHint', 'Secret key configured, leave empty to keep')
+                    : t('admin.settings.turnstile.secretKeyHint', 'Enter secret key from Cloudflare')}
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -579,45 +686,76 @@ export default function SettingsView() {
 
       {/* LinuxDo OAuth */}
       <SectionCard title={t('admin.settings.linuxdo.title', 'LinuxDo Connect Login')} description={t('admin.settings.linuxdo.description', 'Configure LinuxDo Connect OAuth for Sub2API end-user login')}>
+        {/* Enable LinuxDo Login */}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.linuxdo.enable', 'Enable LinuxDo Login')}</span>
+          <div>
+            <label className="font-medium text-gray-900 dark:text-white">
+              {t('admin.settings.linuxdo.enable', 'Enable LinuxDo Login')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('admin.settings.linuxdo.enableHint', 'Allow users to login with LinuxDo Connect')}
+            </p>
+          </div>
           <Toggle value={settings.linuxdo_connect_enabled} onChange={(v) => updateField('linuxdo_connect_enabled', v)} />
         </div>
+
+        {/* LinuxDo Configuration - Only show when enabled */}
         {settings.linuxdo_connect_enabled && (
-          <div className="space-y-4">
-            <div>
-              <label className="input-label">{t('admin.settings.linuxdo.clientId', 'Client ID')}</label>
-              <input
-                type="text"
-                className="input"
-                value={settings.linuxdo_connect_client_id}
-                onChange={(e) => updateField('linuxdo_connect_client_id', e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="input-label">
-                {t('admin.settings.linuxdo.clientSecret', 'Client Secret')}
-                {settings.linuxdo_connect_client_secret_configured && (
-                  <span className="ml-2 text-xs text-emerald-600">{t('admin.settings.linuxdo.clientSecretConfiguredHint', 'Secret configured')}</span>
-                )}
-              </label>
-              <input
-                type="password"
-                className="input"
-                value={linuxdoClientSecret}
-                onChange={(e) => setLinuxdoClientSecret(e.target.value)}
-                placeholder={settings.linuxdo_connect_client_secret_configured ? t('admin.settings.linuxdo.clientSecretHint', 'Leave empty to keep the current value') : ''}
-              />
-            </div>
-            <div>
-              <label className="input-label">{t('admin.settings.linuxdo.redirectUrl', 'Redirect URL')}</label>
-              <input
-                type="text"
-                className="input"
-                value={settings.linuxdo_connect_redirect_url}
-                onChange={(e) => updateField('linuxdo_connect_redirect_url', e.target.value)}
-                placeholder="https://example.com/auth/linuxdo/callback"
-              />
+          <div className="border-t border-gray-100 pt-4 dark:border-dark-700">
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t('admin.settings.linuxdo.clientId', 'Client ID')}
+                </label>
+                <input
+                  type="text"
+                  className="input font-mono text-sm"
+                  value={settings.linuxdo_connect_client_id}
+                  onChange={(e) => updateField('linuxdo_connect_client_id', e.target.value)}
+                  placeholder={t('admin.settings.linuxdo.clientIdPlaceholder', 'Enter client ID')}
+                />
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {t('admin.settings.linuxdo.clientIdHint', 'OAuth client ID from LinuxDo')}
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t('admin.settings.linuxdo.clientSecret', 'Client Secret')}
+                </label>
+                <input
+                  type="password"
+                  className="input font-mono text-sm"
+                  value={linuxdoClientSecret}
+                  onChange={(e) => setLinuxdoClientSecret(e.target.value)}
+                  placeholder={
+                    settings.linuxdo_connect_client_secret_configured
+                      ? t('admin.settings.linuxdo.clientSecretConfiguredPlaceholder', 'Leave empty to keep existing')
+                      : t('admin.settings.linuxdo.clientSecretPlaceholder', 'Enter client secret')
+                  }
+                />
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {settings.linuxdo_connect_client_secret_configured
+                    ? t('admin.settings.linuxdo.clientSecretConfiguredHint', 'Secret configured, leave empty to keep')
+                    : t('admin.settings.linuxdo.clientSecretHint', 'OAuth client secret from LinuxDo')}
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t('admin.settings.linuxdo.redirectUrl', 'Redirect URL')}
+                </label>
+                <input
+                  type="url"
+                  className="input font-mono text-sm"
+                  value={settings.linuxdo_connect_redirect_url}
+                  onChange={(e) => updateField('linuxdo_connect_redirect_url', e.target.value)}
+                  placeholder={t('admin.settings.linuxdo.redirectUrlPlaceholder', 'https://example.com/auth/linuxdo/callback')}
+                />
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {t('admin.settings.linuxdo.redirectUrlHint', 'OAuth callback URL for LinuxDo')}
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -625,20 +763,39 @@ export default function SettingsView() {
 
       {/* Purchase */}
       <SectionCard title={t('admin.settings.purchase.title', 'Purchase Page')} description={t('admin.settings.purchase.description', 'Show a "Purchase Subscription" entry in the sidebar and open the configured URL in an iframe')}>
+        {/* Enable Toggle */}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.purchase.enabled', 'Show Purchase Entry')}</span>
+          <div>
+            <label className="font-medium text-gray-900 dark:text-white">
+              {t('admin.settings.purchase.enabled', 'Show Purchase Entry')}
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('admin.settings.purchase.enabledHint', 'Display purchase option in sidebar')}
+            </p>
+          </div>
           <Toggle value={settings.purchase_subscription_enabled} onChange={(v) => updateField('purchase_subscription_enabled', v)} />
         </div>
+
+        {/* URL - Only show when enabled */}
         {settings.purchase_subscription_enabled && (
-          <div>
-            <label className="input-label">{t('admin.settings.purchase.url', 'Purchase URL')}</label>
-            <input
-              type="text"
-              className="input"
-              value={settings.purchase_subscription_url}
-              onChange={(e) => updateField('purchase_subscription_url', e.target.value)}
-              placeholder="https://shop.example.com"
-            />
+          <div className="border-t border-gray-100 pt-4 dark:border-dark-700">
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t('admin.settings.purchase.url', 'Purchase URL')}
+                </label>
+                <input
+                  type="url"
+                  className="input font-mono text-sm"
+                  value={settings.purchase_subscription_url}
+                  onChange={(e) => updateField('purchase_subscription_url', e.target.value)}
+                  placeholder={t('admin.settings.purchase.urlPlaceholder', 'https://shop.example.com')}
+                />
+                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                  {t('admin.settings.purchase.urlHint', 'URL to purchase subscription page')}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </SectionCard>
@@ -647,66 +804,104 @@ export default function SettingsView() {
       <SectionCard title={t('admin.settings.streamTimeout.title', 'Stream Timeout Handling')} description={t('admin.settings.streamTimeout.description', 'Configure account handling strategy when upstream response times out')}>
         {streamTimeout && (
           <>
+            {/* Enable Stream Timeout */}
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-700 dark:text-gray-300">{t('admin.settings.streamTimeout.enabled', 'Enable Stream Timeout Handling')}</span>
+              <div>
+                <label className="font-medium text-gray-900 dark:text-white">
+                  {t('admin.settings.streamTimeout.enabled', 'Enable Stream Timeout Handling')}
+                </label>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {t('admin.settings.streamTimeout.enabledHint', 'Automatically handle accounts when stream timeout occurs')}
+                </p>
+              </div>
               <Toggle
                 value={streamTimeout.enabled}
                 onChange={(v) => setStreamTimeout((prev) => prev ? { ...prev, enabled: v } : prev)}
               />
             </div>
+
+            {/* Settings - Only show when enabled */}
             {streamTimeout.enabled && (
-              <div className="space-y-4">
-                <div>
-                  <label className="input-label">{t('admin.settings.streamTimeout.action', 'Action')}</label>
-                  <Select
-                    value={streamTimeout.action}
-                    onValueChange={(v) => setStreamTimeout((prev) => prev ? { ...prev, action: v as StreamTimeoutSettings['action'] } : prev)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="temp_unsched">{t('admin.settings.streamTimeout.actionTempUnsched', 'Temporarily Unschedulable')}</SelectItem>
-                      <SelectItem value="error">{t('admin.settings.streamTimeout.actionError', 'Mark as Error')}</SelectItem>
-                      <SelectItem value="none">{t('admin.settings.streamTimeout.actionNone', 'No Action')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="border-t border-gray-100 pt-4 dark:border-dark-700">
+                <div className="grid grid-cols-1 gap-6">
                   <div>
-                    <label className="input-label">{t('admin.settings.streamTimeout.thresholdCount', 'Trigger Threshold (count)')}</label>
-                    <input
-                      type="number"
-                      className="input"
-                      value={streamTimeout.threshold_count}
-                      onChange={(e) => setStreamTimeout((prev) => prev ? { ...prev, threshold_count: parseInt(e.target.value) || 1 } : prev)}
-                      min={1}
-                    />
+                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {t('admin.settings.streamTimeout.action', 'Action')}
+                    </label>
+                    <Select
+                      value={streamTimeout.action}
+                      onValueChange={(v) => setStreamTimeout((prev) => prev ? { ...prev, action: v as StreamTimeoutSettings['action'] } : prev)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="temp_unsched">{t('admin.settings.streamTimeout.actionTempUnsched', 'Temporarily Unschedulable')}</SelectItem>
+                        <SelectItem value="error">{t('admin.settings.streamTimeout.actionError', 'Mark as Error')}</SelectItem>
+                        <SelectItem value="none">{t('admin.settings.streamTimeout.actionNone', 'No Action')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      {t('admin.settings.streamTimeout.actionHint', 'Action to take when timeout threshold is reached')}
+                    </p>
                   </div>
-                  <div>
-                    <label className="input-label">{t('admin.settings.streamTimeout.thresholdWindowMinutes', 'Threshold Window (minutes)')}</label>
-                    <input
-                      type="number"
-                      className="input"
-                      value={streamTimeout.threshold_window_minutes}
-                      onChange={(e) => setStreamTimeout((prev) => prev ? { ...prev, threshold_window_minutes: parseInt(e.target.value) || 5 } : prev)}
-                      min={1}
-                    />
-                  </div>
+
                   {streamTimeout.action === 'temp_unsched' && (
                     <div>
-                      <label className="input-label">{t('admin.settings.streamTimeout.tempUnschedMinutes', 'Pause Duration (minutes)')}</label>
+                      <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {t('admin.settings.streamTimeout.tempUnschedMinutes', 'Pause Duration (minutes)')}
+                      </label>
                       <input
                         type="number"
                         className="input"
                         value={streamTimeout.temp_unsched_minutes}
                         onChange={(e) => setStreamTimeout((prev) => prev ? { ...prev, temp_unsched_minutes: parseInt(e.target.value) || 30 } : prev)}
                         min={1}
+                        max={60}
                       />
+                      <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {t('admin.settings.streamTimeout.tempUnschedMinutesHint', 'Duration to pause the account')}
+                      </p>
                     </div>
                   )}
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {t('admin.settings.streamTimeout.thresholdCount', 'Trigger Threshold (count)')}
+                    </label>
+                    <input
+                      type="number"
+                      className="input"
+                      value={streamTimeout.threshold_count}
+                      onChange={(e) => setStreamTimeout((prev) => prev ? { ...prev, threshold_count: parseInt(e.target.value) || 1 } : prev)}
+                      min={1}
+                      max={10}
+                    />
+                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      {t('admin.settings.streamTimeout.thresholdCountHint', 'Number of timeouts before action is taken')}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {t('admin.settings.streamTimeout.thresholdWindowMinutes', 'Threshold Window (minutes)')}
+                    </label>
+                    <input
+                      type="number"
+                      className="input"
+                      value={streamTimeout.threshold_window_minutes}
+                      onChange={(e) => setStreamTimeout((prev) => prev ? { ...prev, threshold_window_minutes: parseInt(e.target.value) || 5 } : prev)}
+                      min={1}
+                      max={60}
+                    />
+                    <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                      {t('admin.settings.streamTimeout.thresholdWindowMinutesHint', 'Time window for counting timeouts')}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex justify-end">
+
+                {/* Save Button */}
+                <div className="flex justify-end border-t border-gray-100 pt-4 dark:border-dark-700">
                   <Button variant="secondary" size="sm" onClick={handleSaveStreamTimeout}>
                     <CheckIcon className="h-4 w-4" />
                     {t('admin.settings.saveSettings', 'Save Settings')}
