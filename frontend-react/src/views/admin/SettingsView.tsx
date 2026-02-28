@@ -1,7 +1,7 @@
 /**
  * Admin System Settings View
  * Card-based layout with multiple configuration sections:
- * Admin API Key, Registration, Defaults, Site, SMTP, Turnstile, LinuxDo, Purchase, Stream Timeout.
+ * Admin API Key, Registration, Defaults, Site, SMTP, Turnstile, Purchase, Stream Timeout.
  */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -82,9 +82,8 @@ export default function SettingsView() {
   // SMTP password (separate from settings since settings returns configured flag)
   const [smtpPassword, setSmtpPassword] = useState('')
 
-  // Turnstile & LinuxDo secrets
+  // Turnstile secret
   const [turnstileSecretKey, setTurnstileSecretKey] = useState('')
-  const [linuxdoClientSecret, setLinuxdoClientSecret] = useState('')
 
   // ==================== Data Loading ====================
 
@@ -145,21 +144,16 @@ export default function SettingsView() {
         smtp_use_tls: settings.smtp_use_tls,
         turnstile_enabled: settings.turnstile_enabled,
         turnstile_site_key: settings.turnstile_site_key,
-        linuxdo_connect_enabled: settings.linuxdo_connect_enabled,
-        linuxdo_connect_client_id: settings.linuxdo_connect_client_id,
-        linuxdo_connect_redirect_url: settings.linuxdo_connect_redirect_url,
         onboarding_enabled: settings.onboarding_enabled,
       }
       // Include secrets only if user entered them
       if (smtpPassword) req.smtp_password = smtpPassword
       if (turnstileSecretKey) req.turnstile_secret_key = turnstileSecretKey
-      if (linuxdoClientSecret) req.linuxdo_connect_client_secret = linuxdoClientSecret
 
       const updated = await adminAPI.settings.updateSettings(req)
       setSettings(updated)
       setSmtpPassword('')
       setTurnstileSecretKey('')
-      setLinuxdoClientSecret('')
       showSuccess(t('admin.settings.settingsSaved', 'Settings saved successfully'))
     } catch (err: unknown) {
       showError(extractErrorMessage(err as Error, t('admin.settings.failedToSave', 'Failed to save settings')))
@@ -677,83 +671,6 @@ export default function SettingsView() {
                   {settings.turnstile_secret_key_configured
                     ? t('admin.settings.turnstile.secretKeyConfiguredHint', 'Secret key configured, leave empty to keep')
                     : t('admin.settings.turnstile.secretKeyHint', 'Enter secret key from Cloudflare')}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-      </SectionCard>
-
-      {/* LinuxDo OAuth */}
-      <SectionCard title={t('admin.settings.linuxdo.title', 'LinuxDo Connect Login')} description={t('admin.settings.linuxdo.description', 'Configure LinuxDo Connect OAuth for Sub2API end-user login')}>
-        {/* Enable LinuxDo Login */}
-        <div className="flex items-center justify-between">
-          <div>
-            <label className="font-medium text-gray-900 dark:text-white">
-              {t('admin.settings.linuxdo.enable', 'Enable LinuxDo Login')}
-            </label>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t('admin.settings.linuxdo.enableHint', 'Allow users to login with LinuxDo Connect')}
-            </p>
-          </div>
-          <Toggle value={settings.linuxdo_connect_enabled} onChange={(v) => updateField('linuxdo_connect_enabled', v)} />
-        </div>
-
-        {/* LinuxDo Configuration - Only show when enabled */}
-        {settings.linuxdo_connect_enabled && (
-          <div className="border-t border-gray-100 pt-4 dark:border-dark-700">
-            <div className="grid grid-cols-1 gap-6">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t('admin.settings.linuxdo.clientId', 'Client ID')}
-                </label>
-                <input
-                  type="text"
-                  className="input font-mono text-sm"
-                  value={settings.linuxdo_connect_client_id}
-                  onChange={(e) => updateField('linuxdo_connect_client_id', e.target.value)}
-                  placeholder={t('admin.settings.linuxdo.clientIdPlaceholder', 'Enter client ID')}
-                />
-                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                  {t('admin.settings.linuxdo.clientIdHint', 'OAuth client ID from LinuxDo')}
-                </p>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t('admin.settings.linuxdo.clientSecret', 'Client Secret')}
-                </label>
-                <input
-                  type="password"
-                  className="input font-mono text-sm"
-                  value={linuxdoClientSecret}
-                  onChange={(e) => setLinuxdoClientSecret(e.target.value)}
-                  placeholder={
-                    settings.linuxdo_connect_client_secret_configured
-                      ? t('admin.settings.linuxdo.clientSecretConfiguredPlaceholder', 'Leave empty to keep existing')
-                      : t('admin.settings.linuxdo.clientSecretPlaceholder', 'Enter client secret')
-                  }
-                />
-                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                  {settings.linuxdo_connect_client_secret_configured
-                    ? t('admin.settings.linuxdo.clientSecretConfiguredHint', 'Secret configured, leave empty to keep')
-                    : t('admin.settings.linuxdo.clientSecretHint', 'OAuth client secret from LinuxDo')}
-                </p>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t('admin.settings.linuxdo.redirectUrl', 'Redirect URL')}
-                </label>
-                <input
-                  type="url"
-                  className="input font-mono text-sm"
-                  value={settings.linuxdo_connect_redirect_url}
-                  onChange={(e) => updateField('linuxdo_connect_redirect_url', e.target.value)}
-                  placeholder={t('admin.settings.linuxdo.redirectUrlPlaceholder', 'https://example.com/auth/linuxdo/callback')}
-                />
-                <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                  {t('admin.settings.linuxdo.redirectUrlHint', 'OAuth callback URL for LinuxDo')}
                 </p>
               </div>
             </div>
